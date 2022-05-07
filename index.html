@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dicey Farm</title>
+  <link rel="stylesheet" href="./main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+  <div id="app">
+    <h1 class="center">Dicey Farm</h1>
+    <div class="center"  v-show="viewStatus==='howtoplay'">
+      <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
+      <img src="info.png">
+    </div>
+    <div class="center"  v-show="viewStatus==='rules'">
+      <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
+      <img src="rules.png">
+    </div>
+    <div class="container"  v-show="viewStatus==='game'">
+      <div class="row">
+        <div class="col-2 space" id="resources_space">
+          <div>
+            <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
+            <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
+          </div>
+          <ul class="list-group">
+            <li class="list-group-item" v-for="res in resources" v-show='resShow(res)'>
+              <span v-bind:class="{red:not_enough_food(res)}">{{ res.name }}:{{ res.num }}<span v-if='res.name==="食料"'>/{{food_cost}} </span></span>
+                <button type="button" @click="clickResCook(res)" v-show="food_changeable(res)" class="rounded-pill btn-sm">{{food_change_str(res)}}</button>
+                <button type="button" @click="clickResCommand(res)" v-show="show_if_res_command(res)" class="rounded-pill btn-sm">{{res_command_str(res)}}</button>
+            </li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="row space" id="dice_space">
+            {{turn}}ラウンド目  {{turn_seq}}
+            <ul class="list-group list-group-horizontal" >
+              <li class="list-group-item" v-for="die in dice" v-bind:class="[{hover:activeItem===die},{hold:holdingDie===die}]" @mouseover="activeItem=die" @mouseout="activeItem=''"  v-on:click="click_die(die)">
+                <img :src=dice_img(die.num) class="die">
+              </li>
+            </ul>
+            <div>
+              <button v-show="dice_is_zero && status===''" @click="endTurn()">次のラウンドへ</button>
+              <button v-show="status==='' || status==='cooking'" @click="startCooking()">{{cooking_button_str()}}</button>
+            </div>
+          </div>      
+          <div class="row space" id="action_space">
+            <ul class="list-group list-group-horizontal" >
+              <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
+                {{command.name}}<br><span class="des">{{command.des}}</span>
+                <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
+                <button type="button" @click="endCommand()" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
+              </li>
+            </ul>
+            <ul class="list-group list-group-horizontal" >
+              <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
+                {{command.name}}<br><span class="des">{{command.des}}</span>
+                <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
+                <button type="button" @click="endCommand()" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
+                <button type="button" @click="change_by_worker(command.name)" v-show='showButton(command,"出荷")' class="rounded-pill btn-sm">出荷</button>
+                <button type="button" @click="clickWorkerCommand(button)" v-show='showWorkerButtons(button)' v-for="button in workerButtons" :key="command" class="rounded-pill btn-sm">{{button.str}}</button>
+              </li>
+            </ul>
+          </div>
+          <div class="row space" id="merchant_space">
+            本日の商品
+            <ul class="list-group list-group-horizontal" >
+              <li class="list-group-item" v-for="(item, index) in items" :key="item" v-show="index<6">
+                <img class="merchant_dice" :src="dice_img(index+1)">
+                {{item.name}}x{{item.num}}
+              </li>
+            </ul>
+          </div>
+          <div class="row space" id="merchant_space2" v-show="worker_find('行商人')">
+            本日の商品(行商人)
+            <ul class="list-group list-group-horizontal" >
+              <li class="list-group-item" v-for="(item, index) in items2" :key="item" v-show="index<6">
+                <img class="merchant_dice" :src="dice_img(index+1)">
+                {{item.name}}x{{item.num}}
+              </li>
+            </ul>
+          </div>
+          <div class="row space">
+            <div class="col space">
+              畑の様子
+              <ul class="list-group list-group-horizontal" >
+                <li class="list-group-item" v-for="field in fields" :key="field">
+                  {{field.kind}}
+                </li>
+              </ul>
+            </div>
+            <div class="col space">
+              設備
+              <ul class="list-group list-group-horizontal" >
+                <li class="list-group-item facility" v-for="facility in facilities" :key="facility">
+                  {{facility.name}}<br><span class="des">{{facility.des}}</span><br>
+                <button type="button" @click="makeFacility(facility)" v-show="status==='facility'" class="rounded-pill btn-sm">増築</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row space" id="worker_space">
+            契約できる職人
+            <ul class="list-group list-group-horizontal" >
+              <li class="list-group-item worker" v-for="worker in workers">
+                {{worker.name}}<br><span class="des">{{worker.des}}</span><br>
+                <button type="button" @click="contractWorker(worker)" v-show="status==='contract'" class="rounded-pill btn-sm">契約</button>
+                <button type="button" @click="trashWorker(worker)" v-show="status==='trash_worker'" class="rounded-pill btn-sm">捨てる</button>
+              </li>
+            </ul>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="./main.js"></script>
+</body>
+</html>
