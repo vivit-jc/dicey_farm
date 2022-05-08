@@ -110,9 +110,16 @@ h1: {
 .merchant_dice {
   height: 30px;
 }
+
 .center {
   text-align: center;
 }
+
+.right {
+  text-align: right;
+  margin-right: 60px;
+}
+
 #action_space{
 
 }

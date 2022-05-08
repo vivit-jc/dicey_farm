@@ -31,7 +31,7 @@ const app = {
       contracted:[],
       resCooking: "",
       fast_seeding_kind: "",
-      aot:[2,2,3,3,3,4,4,4,5,5],
+      aot:[2,2,3,3,3,4,4,4,-1],
       resources: [
         {name:"勝利点",num:0},
         {name:"物乞い",num:0},
@@ -100,7 +100,6 @@ const app = {
         {name:"鶏",kind:"chiken",num:1},
         {name:"豚",kind:"pig",num:1},
         {name:"羊",kind:"sheep",num:1},
-        {name:"牛",kind:"cow",num:1},
       ],
       items2:[],
       facilities: [
@@ -128,9 +127,9 @@ const app = {
     },
     turn_seq: function(){
       let str = ""
-      for(let i=this.turn-1;i<10;i++){
+      for(let i=this.turn-1;i<8;i++){
         str += this.aot[i]
-        if(i != 9){str += " > "}
+        if(i != 7){str += " > "}
       }
       return str
     },
@@ -270,6 +269,7 @@ const app = {
       this.cost = 0
       if(worker.name === "行商人"){
         this.items2 = this.items.slice()
+        if(this.turn < 3){this.items2.push({name:"牛",kind:"cow",num:1})} //行商人は1,2ターン目でも牛を出す
         this.items2.push({name:"宝石",kind:"jewel",num:1})
         this.shuffle(this.items2)
       }
@@ -301,9 +301,12 @@ const app = {
         this.res_find("食料").num -= this.food_cost
       }
 
-      if(this.turn === 10){
+      if(this.res_find("ウィスキー")){this.res_find("勝利点").num += this.res_find("ウィスキー").num}
+
+      if(this.turn === 8){
         this.endGame = true
         this.countWorkerVP()
+        if(this.res_find("宝石")){this.res_find("勝利点").num += this.res_find("宝石").num*5}
         return true;
       }
 
@@ -312,6 +315,7 @@ const app = {
       this.usedCommands = []
       this.workers = []
       
+      if(this.turn === 3){this.items.push({name:"牛",kind:"cow",num:1})} //牛は3ターン目から出る
       this.shuffle(this.items)
       this.shuffle(this.items2)
       for(let i=0;i<this.aot[this.turn-1];i++){
@@ -424,6 +428,7 @@ const app = {
     },
 
     food_changeable: function(res){
+      if(this.endGame){return false}
       let n = res.name
       if(this.status === "cooking"){
         if(this.resCooking === n){return false;} //料理中、すでに選んでいる食材はボタンを表示しない

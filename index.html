@@ -9,6 +9,9 @@
 <body>
   <div id="app">
     <h1 class="center">Dicey Farm</h1>
+    <div class="right">
+      制作：vivit_jc
+    </div>
     <div class="center"  v-show="viewStatus==='howtoplay'">
       <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
       <img src="info.png">
@@ -33,7 +36,7 @@
           </ul>
         </div>
         <div class="col">
-          <div class="row space" id="dice_space">
+          <div class="row space" id="dice_space" v-show="!endGame">
             {{turn}}ラウンド目  {{turn_seq}}
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item" v-for="die in dice" v-bind:class="[{hover:activeItem===die},{hold:holdingDie===die}]" @mouseover="activeItem=die" @mouseout="activeItem=''"  v-on:click="click_die(die)">
@@ -44,7 +47,10 @@
               <button v-show="dice_is_zero && status===''" @click="endTurn()">次のラウンドへ</button>
               <button v-show="status==='' || status==='cooking'" @click="startCooking()">{{cooking_button_str()}}</button>
             </div>
-          </div>      
+          </div>
+          <div class="row space" id="dice_space" v-show="endGame">
+            最終得点：{{res_find("勝利点").num}}
+          </div>
           <div class="row space" id="action_space">
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
