@@ -44,8 +44,8 @@ const app = {
         {name:"野菜の種",num:0},
         {name:"花の種",num:0},
         {name:"鶏",num:0},
-        {name:"豚",num:0},
         {name:"羊",num:0},
+        {name:"豚",num:0},
         {name:"牛",num:0},
         {name:"肉",num:0},
         {name:"卵",num:0},
@@ -67,12 +67,13 @@ const app = {
         {name:"増築",des:"設備を1つ建てる 6しか置けない"}
       ],
       workers_deck: [
-        {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1,change:true},
+        //変換方法が複数ある職人はchange:trueを付けないことに注意
+        {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1},
         {name:"菓子職人",des:"麦、卵、牛乳を6VPに変える",cost:1,change:true},
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",cost:1,change:true},
         {name:"釣り人",des:"釣りで得る魚+3",cost:1},
         {name:"チーズ職人",des:"牛乳を2VPに変える",cost:1,change:true},
-        {name:"精肉屋",des:"家畜を肉に変える 鶏:1 羊:2 豚:3 牛:4",cost:1,change:true},
+        {name:"精肉屋",des:"家畜を肉に変える 鶏:1 羊:2 豚:3 牛:4",cost:1},
         {name:"ハム職人",des:"豚を4VPに変える",cost:1,change:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"行商人",des:"商人とは別の買い物スロットを追加",cost:1},
@@ -82,7 +83,7 @@ const app = {
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
         {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",cost:1},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",cost:1},
-        {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1,change:true},
+        {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1},
         {name:"養蜂家",des:"麦、野菜、花の収穫時に得る種+1",cost:1},
         {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
         {name:"測量士",des:"ゲーム終了時、畑が10以上あれば12VP",cost:1},
@@ -254,8 +255,8 @@ const app = {
         this.fast_seeding_kind = ""
         return true;
       }
-      this.rest -= 1
-      if(!this.empty_field || this.rest===0){
+      this.decRest()
+      if(!this.empty_field){
         this.status = ""
         this.rest = 0
       }
@@ -405,14 +406,21 @@ const app = {
         return ["ひっくり返す"]
       } else if(name === "長老"){
         return ["+1","-1"]
+      } else if(name === "精肉屋"){
+        return ["鶏>肉1","羊>肉2","豚>肉3","牛>肉4"]
+      } else if(name === "パン職人"){
+        return [">食料2",">VP1"]
+      } else if(name === "ソーセージ職人"){
+        return [">食料2",">VP3"]
       }
     },
 
     showWorkerButtons(worker,button){
       if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
         return true;
+      } else if(this.status === "market"){
+        return true;
       }
-
     },
 
     food_changeable: function(res){
@@ -474,8 +482,7 @@ const app = {
     },
 
     change_to_vp: function(res){
-      this.rest -= 1
-      if(this.rest === 0){this.status = ""}
+      this.decRest()
       res.num -= 1
       if(res.name === "麦"){
         res.num -= 1
@@ -523,11 +530,8 @@ const app = {
         b.num -= 1
         c.num -= 1
         this.res_find("勝利点").num += 6
-      } else if(name === "ソーセージ職人"){
-
       }
-      this.rest -= 1
-      if(this.rest === 0){this.status = ""}
+      this.decRest()
     },
 
     res_find: function(name){
@@ -603,17 +607,11 @@ const app = {
       } else if(this.status === "bread"){
         res.num -= 1
         this.res_find("食料").num += 2
-        this.rest -= 1
-        if(this.rest === 0){
-          this.status = ""
-        }
+        this.decRest()
       } else if(this.status === "butter"){
         res.num -= 1
         this.res_find("バター").num += 1
-        this.rest -= 1
-        if(this.rest === 0){
-          this.status = ""
-        }
+        this.decRest()
       } else if(this.status === "butchering"){
         res.num -= 1
         this.res_find("肉").num += this.meatAmount(res)
@@ -622,7 +620,8 @@ const app = {
     },
 
     clickWorkerCommand(worker,button){
-      if(worker.name === "長老"){
+      let n = worker.name
+      if(n === "長老"){
         if(button === "+1"){
           if(this.holdingDie.num === 6){return false}
           this.dice.push({num:this.holdingDie.num+1})
@@ -633,10 +632,47 @@ const app = {
         this.usedCommands.push(worker.name)
         this.deleteDie()
 
-      } else if(worker.name === "役人"){
+      } else if(n === "役人"){
         this.dice.push({num:7-this.holdingDie.num})
         this.usedCommands.push(worker.name)
         this.deleteDie()
+
+      } else if(n === "パン職人"){
+        let r = this.res_find("麦")
+        if(r.num <= 0){return false}
+        r.num -= 1
+        this.decRest()
+        if(button === ">食料2"){
+          this.res_find("食料").num += 2
+        } else if(button === ">VP1"){
+          this.res_find("勝利点").num += 1
+        }
+      } else if(n === "ソーセージ職人"){
+        let r = this.res_find("肉")
+        if(r.num <= 0){return false}
+        r.num -= 1
+        this.decRest()
+        if(button === ">食料2"){
+          this.res_find("食料").num += 2
+        } else if(button === ">VP3"){
+          this.res_find("勝利点").num += 3
+        }
+      } else if(n === "精肉屋"){
+        meat = ""
+        if(button === "鶏>肉1"){
+          meat = "鶏"
+        } else if(button === "羊>肉2"){
+          meat = "羊"
+        } else if(button === "豚>肉3"){
+          meat = "豚"
+        } else if(button === "牛>肉4"){
+          meat = "牛"
+        }
+        r = this.res_find(meat)
+        if(r.num <= 0){return false}
+        r.num -= 1
+        this.decRest()
+        this.res_find("肉").num += this.meatAmount(r)
       }
     },
 
@@ -652,7 +688,6 @@ const app = {
       let n = res.name
       if(this.status === "market"){
         if(n === "麦"){
-          console.log(res.name)
           return "2>1VP"
         }
         return ">"+this.market_value(res)+"VP"
@@ -730,6 +765,11 @@ const app = {
 
     returnGame: function(){
       this.viewStatus = "game"
+    },
+
+    decRest(){
+      this.rest -= 1
+      if(this.rest === 0){this.status = ""}
     },
 
     shuffle: function(array){
