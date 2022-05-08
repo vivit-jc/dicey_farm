@@ -31,7 +31,7 @@ const app = {
       contracted:[],
       resCooking: "",
       fast_seeding_kind: "",
-      aot:[2,2,3,3,3,4,4,4,-1],
+      aot:[2,2,3,3,3,4,4,4],
       resources: [
         {name:"勝利点",num:0},
         {name:"物乞い",num:0},
@@ -77,7 +77,7 @@ const app = {
         {name:"ハム職人",des:"豚を4VPに変える",cost:1,change:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"行商人",des:"商人とは別の買い物スロットを追加",cost:1},
-        {name:"仕立て屋",des:"3羊毛を5VPに変える",cost:1,change:true},
+        {name:"仕立て屋",des:"3羊毛を8VPに変える",cost:1,change:true},
         {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",cost:1},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
@@ -301,12 +301,13 @@ const app = {
         this.res_find("食料").num -= this.food_cost
       }
 
-      if(this.res_find("ウィスキー")){this.res_find("勝利点").num += this.res_find("ウィスキー").num}
+      this.res_find("勝利点").num += this.res_find("ウィスキー").num
 
       if(this.turn === 8){
         this.endGame = true
         this.countWorkerVP()
-        if(this.res_find("宝石")){this.res_find("勝利点").num += this.res_find("宝石").num*5}
+        this.res_find("勝利点").num -= this.res_find("物乞い").num-3
+        this.res_find("勝利点").num += this.res_find("宝石").num*5
         return true;
       }
 
@@ -525,7 +526,7 @@ const app = {
         let r = this.res_find("羊毛")
         if(r.num < 3){return false}
         r.num -= 3
-        this.res_find("勝利点").num += 5
+        this.res_find("勝利点").num += 8
       } else if(name === "パン職人"){
 
       } else if(name === "菓子職人"){
