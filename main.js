@@ -63,7 +63,7 @@ const app = {
         {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
-        {name:"出荷",des:"商品を市場で売るか、職人に届ける(N+3回) 8ラウンド目だけ何回でも可"},
+        {name:"出荷",des:"商品を市場で売るか、職人に届ける(N+2回) 8ラウンド目だけ何回でも可"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"}
       ],
       workers_deck: [
@@ -74,10 +74,10 @@ const app = {
         {name:"釣り人",des:"釣りで得る魚+3",cost:1},
         {name:"チーズ職人",des:"牛乳を2VPに変える",cost:1,change:true},
         {name:"精肉屋",des:"家畜を肉に変える 鶏:1 羊:2 豚:3 牛:4",cost:1},
-        {name:"ハム職人",des:"豚を4VPに変える",cost:1,change:true},
+        {name:"ハム職人",des:"豚を6VPに変える",cost:1,change:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"行商人",des:"商人とは別の買い物スロットを追加",cost:1},
-        {name:"仕立て屋",des:"3羊毛を8VPに変える",cost:1,change:true},
+        {name:"仕立て屋",des:"3羊毛を7VPに変える",cost:1,change:true},
         {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",cost:1},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
@@ -86,8 +86,8 @@ const app = {
         {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1},
         {name:"養蜂家",des:"麦、野菜、花の収穫時に得る種+1",cost:1},
         {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
-        {name:"測量士",des:"ゲーム終了時、畑が10以上あれば12VP",cost:1},
-        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば10VP",cost:1},
+        {name:"測量士",des:"ゲーム終了時、畑が7以上あれば30VP",cost:1},
+        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば12VP",cost:1},
         {name:"荷運び",des:"出荷の回数+3",cost:1},
         {name:"斡旋業者",des:"契約時の食料コストが常に1になる",cost:1},
         {name:"大工",des:"どのダイスでも増築できる",cost:1},
@@ -103,7 +103,7 @@ const app = {
       ],
       items2:[],
       facilities: [
-        {name:"パン焼きかまど",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
+        {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
         {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
         {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
         {name:"毛刈り小屋",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:0},
@@ -223,7 +223,7 @@ const app = {
         if(this.worker_find("斡旋業者")){this.cost = 1}
       
       } else if(n === "出荷"){
-        this.rest = this.holdingDie.num+3
+        this.rest = this.holdingDie.num+2
         if(this.worker_find("荷運び")){this.rest += 3}
         this.status = "market"
       
@@ -232,7 +232,7 @@ const app = {
         else if(this.holdingDie.num != 6){return false}
         this.status = "facility"
 
-      } else if(n === "パン焼きかまど"){
+      } else if(n === "パン焼き釜"){
         this.status = "bread"
         this.rest = this.holdingDie.num
 
@@ -312,7 +312,7 @@ const app = {
       if(this.turn === 8){
         this.endGame = true
         this.countWorkerVP()
-        this.res_find("勝利点").num -= this.res_find("物乞い").num-3
+        this.res_find("勝利点").num -= this.res_find("物乞い").num*3
         this.res_find("勝利点").num += this.res_find("宝石").num*5
         return true;
       }
@@ -385,7 +385,7 @@ const app = {
           return true;
         } else if(this.status === "seeding" && command.name === "種を蒔く"){
           return true;
-        } else if(this.status === "bread" && command.name === "パン焼きかまど"){
+        } else if(this.status === "bread" && command.name === "パン焼き釜"){
           return true;
         } else if(this.status === "butter" && command.name === "バター工房"){
           return true;
@@ -408,7 +408,7 @@ const app = {
         return true;
       } else if(this.status === "market" && command.name === "出荷"){
         return true;
-      } else if(this.status === "bread" && command.name === "パン焼きかまど"){
+      } else if(this.status === "bread" && command.name === "パン焼き釜"){
         return true
       } else if(this.status === "butter" && command.name === "バター工房"){
         return true;
@@ -432,7 +432,7 @@ const app = {
     showWorkerButtons(worker,button){
       if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
         return true;
-      } else if(this.status === "market"){
+      } else if(this.status === "market" && !worker.dice){
         return true;
       }
     },
@@ -501,7 +501,7 @@ const app = {
         let r = this.res_find("豚")
         if(r.num === 0){return false}
         r.num -= 1
-        this.res_find("勝利点").num += 4
+        this.res_find("勝利点").num += 6
       } else if(name === "ウィスキー職人"){
         let r = this.res_find("麦")
         if(r.num < 2){return false}
@@ -524,7 +524,7 @@ const app = {
         let r = this.res_find("羊毛")
         if(r.num < 3){return false}
         r.num -= 3
-        this.res_find("勝利点").num += 8
+        this.res_find("勝利点").num += 7
       } else if(name === "パン職人"){
 
       } else if(name === "菓子職人"){
@@ -740,10 +740,10 @@ const app = {
         this.res_find("勝利点").num = Math.floor(this.res_find("勝利点").num*1.2)
       }
       if(this.worker_find("畜産学者") && this.res_find("鶏").num > 0 && this.res_find("羊").num > 0 && this.res_find("豚").num > 0 && this.res_find("牛").num > 0){
-        this.res_find("勝利点").num += 10
-      }
-      if(this.worker_find("測量士") && this.fields.length >= 10){
         this.res_find("勝利点").num += 12
+      }
+      if(this.worker_find("測量士") && this.fields.length >= 7){
+        this.res_find("勝利点").num += 30
       }
       if(this.worker_find("牧師")){
         if(this.res_find("物乞い").num > 5){this.res_find("物乞い").num -= 5}
