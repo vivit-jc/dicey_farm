@@ -64,7 +64,6 @@ const app = {
         {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
-        {name:"募集",des:"職人を4枚引いてN枚捨てる"},
         {name:"出荷",des:"商品を市場で売るか、職人に届ける(N+3回)"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"}
       ],
@@ -158,7 +157,7 @@ const app = {
       this.dice.push({num:Math.floor(Math.random()*6)+1})
     }
 
-    for(let i=0;i<4;i++){
+    for(let i=0;i<3;i++){
       this.workers.push(this.workers_deck.pop())
     }
 
@@ -318,23 +317,28 @@ const app = {
         this.res_find("食料").num -= this.food_cost
       }
 
-      this.usedCommands = []
-
       if(this.turn === 10){
         this.endGame = true
         this.countWorkerVP()
-      } else {
-        this.shuffle(this.items)
-        this.shuffle(this.items2)
-        this.field_die = ""
-        this.turn += 1
-        for(let i=0;i<this.aot[this.turn-1];i++){
-          this.dice.push({num:Math.floor(Math.random()*6)+1})
-        }
-        this.rotResource()
-        this.growPlantsAndAnimals()
-        if(this.worker_find("世話人")){this.res_find("食料").num+=2}
+        return true;
       }
+
+      this.turn += 1
+      this.field_die = ""
+      this.usedCommands = []
+      this.workers = []
+      
+      this.shuffle(this.items)
+      this.shuffle(this.items2)
+      for(let i=0;i<this.aot[this.turn-1];i++){
+        this.dice.push({num:Math.floor(Math.random()*6)+1})
+      }
+      for(let i=0;i<3;i++){
+        this.workers.push(this.workers_deck.pop())
+      }
+      this.rotResource()
+      this.growPlantsAndAnimals()
+      if(this.worker_find("世話人")){this.res_find("食料").num+=2}
     },
 
     endCommand: function(){
