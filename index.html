@@ -59,7 +59,7 @@
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <button type="button" @click="endCommand()" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
                 <button type="button" @click="change_by_worker(command.name)" v-show='showButton(command,"出荷")' class="rounded-pill btn-sm">出荷</button>
-                <button type="button" @click="clickWorkerCommand(button)" v-show='showWorkerButtons(button)' v-for="button in workerButtons" :key="command" class="rounded-pill btn-sm">{{button.str}}</button>
+                <button type="button" @click="clickWorkerCommand(command,button)" v-show='showWorkerButtons(command,button)' v-for="button in workerButtons(command.name)" :key="command" class="rounded-pill btn-sm">{{button}}</button>
               </li>
             </ul>
           </div>

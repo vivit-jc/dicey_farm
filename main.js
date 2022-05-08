@@ -31,7 +31,6 @@ const app = {
       contracted:[],
       resCooking: "",
       fast_seeding_kind: "",
-      workerButtons: [],
       aot:[2,2,3,3,3,4,4,4,5,5],
       resources: [
         {name:"勝利点",num:0},
@@ -401,6 +400,21 @@ const app = {
       }
     },
 
+    workerButtons: function(name){
+      if(name === "役人"){
+        return ["ひっくり返す"]
+      } else if(name === "長老"){
+        return ["+1","-1"]
+      }
+    },
+
+    showWorkerButtons(worker,button){
+      if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
+        return true;
+      }
+
+    },
+
     food_changeable: function(res){
       let n = res.name
       if(this.status === "cooking"){
@@ -604,6 +618,25 @@ const app = {
         res.num -= 1
         this.res_find("肉").num += this.meatAmount(res)
         this.status = ""
+      }
+    },
+
+    clickWorkerCommand(worker,button){
+      if(worker.name === "長老"){
+        if(button === "+1"){
+          if(this.holdingDie.num === 6){return false}
+          this.dice.push({num:this.holdingDie.num+1})
+        } else if(button === "-1"){
+          if(this.holdingDie.num === 1){return false}
+          this.dice.push({num:this.holdingDie.num-1})
+        }
+        this.usedCommands.push(worker.name)
+        this.deleteDie()
+
+      } else if(worker.name === "役人"){
+        this.dice.push({num:7-this.holdingDie.num})
+        this.usedCommands.push(worker.name)
+        this.deleteDie()
       }
     },
 
