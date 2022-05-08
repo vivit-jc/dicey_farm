@@ -123,8 +123,8 @@ const app = {
     dice_is_zero: function(){
       return this.dice.length === 0
     },
-    existEmptyField: function(){
-      return !(this.fields.find(e => e.kind === "空き") === undefined)
+    empty_field: function(){
+      return this.fields.find(e => e.kind === "空き")
     },
     turn_seq: function(){
       let str = ""
@@ -197,12 +197,16 @@ const app = {
         let item
         if(n === "商人"){item = this.items[this.holdingDie.num-1]}
         else if(n === "行商人"){item = this.items2[this.holdingDie.num-1]}
+        if(this.isAnimal(this.res_find(item.name))){ //動物を買う場合
+          if(!this.existEmptyFieldForAnimal(item.name)){return false;}
+          if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
+        }
         this.res_find(item.name).num += item.num
         repeatable = true
         if(this.worker_find("種まき人")) {this.fast_seeding(this.res_find(item.name))}
       
       } else if(n === "種を蒔く"){
-        if(!this.existEmptyField){return false}
+        if(!this.empty_field){return false}
         this.status = "seeding"
         this.rest = this.holdingDie.num
       
@@ -243,7 +247,7 @@ const app = {
     },
 
     doSeed: function(seed){
-      let f = this.fields.find(e => e.kind === "空き");
+      let f = this.empty_field 
       f.kind = seed.name
       seed.num -= 1
       if(this.fast_seeding_kind){ //種まき人の効果は1回だけ
@@ -252,7 +256,7 @@ const app = {
         return true;
       }
       this.rest -= 1
-      if(!this.existEmptyField || this.rest===0){
+      if(!this.empty_field || this.rest===0){
         this.status = ""
         this.rest = 0
       }
@@ -279,7 +283,7 @@ const app = {
 
     fast_seeding: function(res){
       if(this.isSeed(res) != true){return false}
-      if(!(this.fields.find(e => e.kind === "空き"))){return false}
+      if(!this.fields.find(e => e.kind === "空き")){return false}
       this.status = "fast_seeding"
       this.fast_seeding_kind = res.name
     },
@@ -357,7 +361,7 @@ const app = {
           this.res_find("花").num += 2
           if(w){this.res_find("花の種").num += 1}
         }
-        e.kind = "空き"
+        if(!this.isAnimal(e.kind)){e.kind = "空き"}
       })
     },
 
@@ -421,6 +425,10 @@ const app = {
     },
 
     isAnimal: function(res){
+      //文字列で来てもオブジェクトで来ても受け付ける
+      if(res==="鶏" || res==="羊" || res==="豚" || res==="牛"){
+        return true
+      }
       let n = res.name
       if(n==="鶏" || n==="羊" || n==="豚" || n==="牛"){
         return true
@@ -646,6 +654,13 @@ const app = {
       else if(n === "羊"){return 2}
       else if(n === "豚"){return 3}
       else if(n === "牛"){return 4}
+    },
+
+    existEmptyFieldForAnimal: function(name){
+      if(!(name === "鶏" || name === "羊" || name === "豚" || name === "牛")){return false}
+      if(this.fields.find(e => e.kind === name)){return true}
+      else if(this.empty_field){return true}
+      return false
     },
 
     countWorkerVP: function(){
