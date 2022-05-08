@@ -44,7 +44,7 @@
               </li>
             </ul>
             <div>
-              <button v-show="dice_is_zero && status===''" @click="endTurn()">次のラウンドへ</button>
+              <button v-show="dice_is_zero && status===''" @click="endTurn()">次のラウンドへ{{alertFood}}</button>
               <button v-show="status==='' || status==='cooking'" @click="startCooking()">{{cooking_button_str()}}</button>
             </div>
           </div>

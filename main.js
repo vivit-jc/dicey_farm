@@ -63,7 +63,7 @@ const app = {
         {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
-        {name:"出荷",des:"商品を市場で売るか、職人に届ける(N+3回)"},
+        {name:"出荷",des:"商品を市場で売るか、職人に届ける(N+3回) 8ラウンド目だけ何回でも可"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"}
       ],
       workers_deck: [
@@ -142,6 +142,12 @@ const app = {
 //      return this.aot[this.turn-1] + wc
       return this.aot[this.turn-1]+1
     },
+    alertFood(){
+      if(this.res_find("食料").num < this.food_cost){
+        return "(注意：食料が足りません！)"
+      }
+      return ""
+    }
   },
 
   watch: {
@@ -156,7 +162,7 @@ const app = {
       this.dice.push({num:Math.floor(Math.random()*6)+1})
     }
 
-    for(let i=0;i<3;i++){
+    for(let i=0;i<5;i++){
       this.workers.push(this.workers_deck.pop())
     }
 
@@ -241,7 +247,7 @@ const app = {
       } else {
         return false
       }
-      if(!repeatable){this.usedCommands.push(command.name)}
+      if(!(repeatable || (this.turn === 8 && n === "出荷"))){this.usedCommands.push(command.name)}
       this.deleteDie()
     },
 
@@ -314,7 +320,7 @@ const app = {
       this.turn += 1
       this.field_die = ""
       this.usedCommands = []
-      this.workers = []
+      this.workers.splice(0, 2)
       
       if(this.turn === 3){this.items.push({name:"牛",kind:"cow",num:1})} //牛は3ターン目から出る
       this.shuffle(this.items)
@@ -322,8 +328,11 @@ const app = {
       for(let i=0;i<this.aot[this.turn-1];i++){
         this.dice.push({num:Math.floor(Math.random()*6)+1})
       }
-      for(let i=0;i<3;i++){
-        this.workers.push(this.workers_deck.pop())
+      let wc = this.workers.length
+      for(let i=0;i<5-wc;i++){
+        if(this.workers_deck.length > 0){
+          this.workers.push(this.workers_deck.pop())
+        }
       }
       this.rotResource()
       this.growPlantsAndAnimals()
@@ -467,24 +476,13 @@ const app = {
 
     sellable: function(res){
       let n = res.name
-      if(n==="魚" || n==="野菜" || n==="花" || n==="卵" || n==="牛乳" || n==="羊毛" || n==="肉"){
+      if(n==="魚" || n==="野菜" || n==="花" || n==="卵" || n==="牛乳" || n==="羊毛" || n==="肉" || n==="バター"){
         return true
       } else if(n === "麦" && res.num >= 2){
         return true
       } else {
         return false
       }
-    },
-
-    change_to_food: function(res){
-      res.num -= 1
-      this.res_find("食料").num += this.food_amount(res)
-    },
-
-    food_amount: function(res){
-      if(res.name === "麦"){return 1}
-      else if(res.name === "肉"){return 3}
-      else{return 2}
     },
 
     change_to_vp: function(res){
@@ -717,7 +715,7 @@ const app = {
       let r = res.name
       if(r === "魚" || r === "卵" || r === "野菜" || r === "牛乳" || r === "羊毛"){
         return 1
-      } else if(r === "花" || r === "肉"){
+      } else if(r === "花" || r === "肉" || r === "バター"){
         return 2
       }
     },
