@@ -193,8 +193,10 @@ const app = {
         if(this.field_die != this.holdingDie.num){return false}
         this.fields.push({kind:"空き"})
       
-      } else if(n === "商人"){
-        item = this.items[this.holdingDie.num-1]
+      } else if(n === "商人" || n === "行商人"){
+        let item
+        if(n === "商人"){item = this.items[this.holdingDie.num-1]}
+        else if(n === "行商人"){item = this.items2[this.holdingDie.num-1]}
         this.res_find(item.name).num += item.num
         repeatable = true
         if(this.worker_find("種まき人")) {this.fast_seeding(this.res_find(item.name))}
@@ -211,14 +213,6 @@ const app = {
         this.cost = this.holdingDie.num
         if(this.worker_find("斡旋業者")){this.cost = 1}
       
-      } else if(n === "募集"){
-        if(this.holdingDie.num > this.workers.length+3){return false}
-        for(let i=0;i<4;i++){
-          this.workers.push(this.workers_deck.pop())
-        }
-        this.rest = this.holdingDie.num
-        this.status = "trash_worker"
-      
       } else if(n === "出荷"){
         this.rest = this.holdingDie.num+3
         if(this.worker_find("荷運び")){this.rest += 3}
@@ -228,12 +222,6 @@ const app = {
         if(this.worker_find("大工")){}
         else if(this.holdingDie.num != 6){return false}
         this.status = "facility"
-
-      } else if(n === "行商人"){
-        item = this.items2[this.holdingDie.num-1]
-        this.res_find(item.name).num += item.num
-        repeatable = true
-        if(this.worker_find("種まき人")) {this.fast_seeding(this.res_find(item.name))}
 
       } else if(n === "パン焼きかまど"){
         this.status = "bread"
@@ -280,14 +268,6 @@ const app = {
         this.items2 = this.items.slice()
         this.items2.push({name:"宝石",kind:"jewel",num:1})
         this.shuffle(this.items2)
-      }
-    },
-
-    trashWorker: function(worker){
-      this.workers.splice(this.workers.indexOf(worker), 1)
-      this.rest -= 1
-      if(this.rest === 0){
-        this.status = ""
       }
     },
 
