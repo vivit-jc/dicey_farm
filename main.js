@@ -73,7 +73,7 @@ const app = {
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",cost:1,change:true},
         {name:"釣り人",des:"釣りで得る魚+3",cost:1},
         {name:"チーズ職人",des:"牛乳を2VPに変える",cost:1,change:true},
-        {name:"精肉屋",des:"家畜を肉に変える 鶏:1 羊:2 豚:3 牛:4",cost:1},
+        {name:"精肉屋",des:"家畜を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:1},
         {name:"ハム職人",des:"豚を6VPに変える",cost:1,change:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"行商人",des:"商人とは別の買い物スロットを追加",cost:1},
@@ -91,7 +91,7 @@ const app = {
         {name:"荷運び",des:"出荷の回数+3",cost:1},
         {name:"斡旋業者",des:"契約時の食料コストが常に1になる",cost:1},
         {name:"大工",des:"どのダイスでも増築できる",cost:1},
-        {name:"花屋",des:"花を3VPと花の種1つに変える",cost:1,change:true},
+        {name:"花屋",des:"花を4VPに変える",cost:1,change:true},
       ],
       items: [
         {name:"麦の種",kind:"wheat_seed",num:2},
@@ -107,7 +107,7 @@ const app = {
         {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
         {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
         {name:"毛刈り小屋",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:0},
-        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:1 羊:2 豚:3 牛:4",cost:0,action:true},
+        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
       ],
       fields: [],
       options: [
@@ -507,14 +507,11 @@ const app = {
         if(r.num < 2){return false}
         r.num -= 2
         this.res_find("ウィスキー").num += 1
-      } else if(name === "精肉屋"){
-
       } else if(name === "花屋"){
         let r = this.res_find("花")
         if(r.num === 0){return false}
         r.num -= 1
-        this.res_find("勝利点").num += 3
-        this.res_find("花の種").num += 1
+        this.res_find("勝利点").num += 4
       } else if(name === "チーズ職人"){
         let r = this.res_find("牛乳")
         if(r.num === 0){return false}
@@ -525,8 +522,6 @@ const app = {
         if(r.num < 3){return false}
         r.num -= 3
         this.res_find("勝利点").num += 7
-      } else if(name === "パン職人"){
-
       } else if(name === "菓子職人"){
         let a = this.res_find("麦"),b = this.res_find("牛乳"),c = this.res_find("卵")
         if(a.num === 0 || b.num === 0 || c.num === 0){return false}
@@ -620,6 +615,7 @@ const app = {
         res.num -= 1
         this.res_find("肉").num += this.meatAmount(res)
         this.status = ""
+        this.checkFieldsFilled()
       }
     },
 
@@ -677,6 +673,7 @@ const app = {
         r.num -= 1
         this.decRest()
         this.res_find("肉").num += this.meatAmount(r)
+        this.checkFieldsFilled()
       }
     },
 
@@ -722,10 +719,10 @@ const app = {
 
     meatAmount: function(res){
       let n = res.name
-      if(n === "鶏"){return 1}
-      else if(n === "羊"){return 2}
-      else if(n === "豚"){return 3}
-      else if(n === "牛"){return 4}
+      if(n === "鶏"){return 2}
+      else if(n === "羊"){return 4}
+      else if(n === "豚"){return 6}
+      else if(n === "牛"){return 8}
     },
 
     existEmptyFieldForAnimal: function(name){
@@ -733,6 +730,15 @@ const app = {
       if(this.fields.find(e => e.kind === name)){return true}
       else if(this.empty_field){return true}
       return false
+    },
+
+    checkFieldsFilled(){  //家畜が減った後、畑を空にする処理
+      let animals = ["鶏","羊","豚","牛"]
+      animals.forEach(e => {
+        if(this.res_find(e).num === 0 && this.fields.find(f => f.kind === e)){
+          this.fields.find(f => f.kind === e).kind = "空き"
+        }
+      })
     },
 
     countWorkerVP: function(){
