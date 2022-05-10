@@ -445,7 +445,7 @@ const app = {
       } else if(name === "長老"){
         return ["+1","-1"]
       } else if(name === "精肉屋"){
-        return ["鶏>肉1","羊>肉2","豚>肉3","牛>肉4"]
+        return ["鶏>肉2","羊>肉4","豚>肉6","牛>肉8"]
       } else if(name === "パン職人"){
         return [">食料2",">VP1"]
       } else if(name === "ソーセージ職人"){
@@ -702,7 +702,7 @@ const app = {
         } else if(button === "牛>肉8"){
           meat = "牛"
         }
-        r = this.res_find(meat)
+        let r = this.res_find(meat)
         if(r.num <= 0){return false}
         r.num -= 1
         this.decRest()
