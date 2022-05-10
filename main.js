@@ -63,8 +63,9 @@ const app = {
         {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
-        {name:"出荷",des:"商品を市場で売るか、職人に届ける(N+2回) 8ラウンド目だけ何回でも可"},
-        {name:"増築",des:"設備を1つ建てる 6しか置けない"}
+        {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可"},
+        {name:"増築",des:"設備を1つ建てる 6しか置けない"},
+        {name:"日雇い労働",des:"食料3を得る"}
       ],
       workers_deck: [
         //変換方法が複数ある職人はchange:trueを付けないことに注意
@@ -232,6 +233,9 @@ const app = {
         else if(this.holdingDie.num != 6){return false}
         this.status = "facility"
 
+      } else if(n === "日雇い労働"){
+        this.res_find("食料").num += 3
+
       } else if(n === "パン焼き釜"){
         this.status = "bread"
         this.rest = this.holdingDie.num
@@ -239,11 +243,13 @@ const app = {
       } else if(n === "バター工房"){
         this.status = "butter"
         this.rest = this.holdingDie.num
+
       } else if(n === "解体小屋"){
         if(this.res_find("鶏").num === 0 && this.res_find("羊").num === 0 && this.res_find("豚").num === 0 && this.res_find("牛").num === 0){
           return false
         }
         this.status = "butchering"
+
       } else {
         return false
       }
