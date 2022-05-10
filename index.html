@@ -28,16 +28,16 @@
             <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
             <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
           </div>
-          <ul class="list-group" v-show="!endGame">
+          <ul class="list-group" v-show="endGame">
+            <li class="list-group-item" v-for="vp in vps" v-show='showVP(vp)'>
+              {{vp.name}}:{{vp.num}}
+            </li>
+          </ul>
+          <ul class="list-group">
             <li class="list-group-item" v-for="res in resources" v-show='resShow(res)'>
               <span v-bind:class="{red:not_enough_food(res)}">{{res.rot}}{{ res.name }}:{{ res.num }}<span v-if='res.name==="食料"'>/{{food_cost}} </span></span>
                 <button type="button" @click="clickResCook(res)" v-show="food_changeable(res)" class="rounded-pill btn-sm">{{food_change_str(res)}}</button>
                 <button type="button" @click="clickResCommand(res)" v-show="show_if_res_command(res)" class="rounded-pill btn-sm">{{res_command_str(res)}}</button>
-            </li>
-          </ul>
-          <ul class="list-group" v-show="endGame">
-            <li class="list-group-item" v-for="vp in vps" v-show='showVP(vp)'>
-              {{vp.name}}:{{vp.num}}
             </li>
           </ul>
         </div>
