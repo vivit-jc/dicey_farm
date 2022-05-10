@@ -815,7 +815,7 @@ const app = {
 
     showRules: function(){
       var URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/rule.md';
-      var Name = 'Rainbow';
+      var Name = 'dicey_farm';
       window.open(URL,Name);
     },
 
