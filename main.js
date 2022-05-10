@@ -814,7 +814,9 @@ const app = {
     },
 
     showRules: function(){
-      this.viewStatus = "rules"
+      var URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/rule.md';
+      var Name = 'Rainbow';
+      window.open(URL,Name);
     },
 
     returnGame: function(){
