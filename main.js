@@ -179,7 +179,7 @@ const app = {
       this.workers.push(this.workers_deck.pop())
     }
 
-    console.log("Dicey Farm ver 0.3")
+    console.log("Dicey Farm ver 0.4")
 
     this.fields.push({kind:"空き"})
     //this.fields.push({kind:"空き"})
@@ -815,7 +815,7 @@ const app = {
 
     showRules: function(){
       var URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/rule.md';
-      var Name = 'dicey_farm';
+      var Name = 'dicey_farm_rule';
       window.open(URL,Name);
     },
 

@@ -29,7 +29,7 @@
             <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
           </div>
           <ul class="list-group" v-show="endGame">
-            <li class="list-group-item" v-for="vp in vps" v-show='showVP(vp)'>
+            <li class="list-group-item vp_list" v-for="vp in vps" v-show='showVP(vp)'>
               {{vp.name}}:{{vp.num}}
             </li>
           </ul>
