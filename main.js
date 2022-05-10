@@ -29,6 +29,7 @@ const app = {
       dice: [],
       workers: [],
       contracted:[],
+      fields: [],
       resCooking: "",
       fast_seeding_kind: "",
       aot:[2,2,3,3,3,4,4,4],
@@ -36,10 +37,10 @@ const app = {
         {name:"勝利点",num:0},
         {name:"物乞い",num:0},
         {name:"食料",num:3},
-        {name:"魚",num:0},
+        {name:"魚",num:0,rot:"▲"},
         {name:"麦",num:0},
-        {name:"野菜",num:0},
-        {name:"花",num:0},
+        {name:"野菜",num:0,rot:"▲"},
+        {name:"花",num:0,rot:"▲"},
         {name:"麦の種",num:0},
         {name:"野菜の種",num:0},
         {name:"花の種",num:0},
@@ -47,14 +48,13 @@ const app = {
         {name:"羊",num:0},
         {name:"豚",num:0},
         {name:"牛",num:0},
-        {name:"肉",num:0},
-        {name:"卵",num:0},
-        {name:"牛乳",num:0},
+        {name:"肉",num:0,rot:"▲"},
+        {name:"卵",num:0,rot:"▲"},
+        {name:"牛乳",num:0,rot:"▲"},
         {name:"バター",num:0},
         {name:"羊毛",num:0},
         {name:"ウィスキー",num:0},
         {name:"宝石",num:0},
-        
       ],
       commands: [
         {name:"釣り",des:"魚を(N-2)個得る（最低1）"},
@@ -110,11 +110,21 @@ const app = {
         {name:"毛刈り小屋",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:0},
         {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
       ],
-      fields: [],
-      options: [
-        { value: -1, label: 'すべて' },
-        { value: 0, label: '作業中' },
-        { value: 1, label: '完了' }
+      vps:[
+        {name:"市場",num:0},
+        {name:"ウィスキー",num:0},
+        {name:"宝石",num:0},
+        {name:"パン職人",num:0},
+        {name:"菓子職人",num:0},
+        {name:"チーズ職人",num:0},
+        {name:"ハム職人",num:0},
+        {name:"仕立て屋",num:0},
+        {name:"ソーセージ職人",num:0},
+        {name:"花屋",num:0},
+        {name:"測量士",num:0},
+        {name:"畜産学者",num:0},
+        {name:"会計士",num:0},
+        {name:"物乞い",num:0},
       ]
     }
   },
@@ -291,6 +301,10 @@ const app = {
       this.contracted.push(facility)
       this.facilities.splice(this.facilities.indexOf(facility), 1)
       this.status = ""
+      if(facility.name === "燻製小屋"){
+        this.res_find("肉").rot = ""
+        this.res_find("魚").rot = "" 
+      }
     },
 
     fast_seeding: function(res){
@@ -313,13 +327,13 @@ const app = {
         this.res_find("食料").num -= this.food_cost
       }
 
-      this.res_find("勝利点").num += this.res_find("ウィスキー").num
+      this.memoVP("ウィスキー",this.res_find("ウィスキー").num)
 
       if(this.turn === 8){
         this.endGame = true
+        this.memoVP("宝石",this.res_find("宝石").num*5)
         this.countWorkerVP()
-        this.res_find("勝利点").num -= this.res_find("物乞い").num*3
-        this.res_find("勝利点").num += this.res_find("宝石").num*5
+        this.memoVP("物乞い",(this.res_find("物乞い").num*3)*(-1))
         return true;
       }
 
@@ -496,9 +510,9 @@ const app = {
       res.num -= 1
       if(res.name === "麦"){
         res.num -= 1
-        this.res_find("勝利点").num += 1
+        this.memoVP("市場",1)
       } else {
-        this.res_find("勝利点").num += this.market_value(res)
+        this.memoVP("市場",this.market_value(res))
       }
     },
 
@@ -507,7 +521,7 @@ const app = {
         let r = this.res_find("豚")
         if(r.num === 0){return false}
         r.num -= 1
-        this.res_find("勝利点").num += 6
+        this.memoVP("ハム職人",6)
       } else if(name === "ウィスキー職人"){
         let r = this.res_find("麦")
         if(r.num < 2){return false}
@@ -517,24 +531,24 @@ const app = {
         let r = this.res_find("花")
         if(r.num === 0){return false}
         r.num -= 1
-        this.res_find("勝利点").num += 4
+        this.memoVP("花屋",4)
       } else if(name === "チーズ職人"){
         let r = this.res_find("牛乳")
         if(r.num === 0){return false}
         r.num -= 1
-        this.res_find("勝利点").num += 2
+        this.memoVP("チーズ職人",2)
       } else if(name === "仕立て屋"){
         let r = this.res_find("羊毛")
         if(r.num < 3){return false}
         r.num -= 3
-        this.res_find("勝利点").num += 7
+        this.memoVP("仕立て屋",7)
       } else if(name === "菓子職人"){
         let a = this.res_find("麦"),b = this.res_find("牛乳"),c = this.res_find("卵")
         if(a.num === 0 || b.num === 0 || c.num === 0){return false}
         a.num -= 1
         b.num -= 1
         c.num -= 1
-        this.res_find("勝利点").num += 6
+        this.memoVP("菓子職人",6)
       }
       this.decRest()
     },
@@ -545,6 +559,10 @@ const app = {
 
     worker_find: function(name){
       return this.contracted.find(e => e.name === name);
+    },
+
+    vp_find(name){
+      return this.vps.find(e => e.name === name)
     },
 
     not_enough_food: function(res){
@@ -749,18 +767,28 @@ const app = {
 
     countWorkerVP: function(){
       if(this.worker_find("会計士")){
-        this.res_find("勝利点").num = Math.floor(this.res_find("勝利点").num*1.2)
+        this.memoVP("会計士",Math.floor(this.res_find("勝利点").num/5))
       }
       if(this.worker_find("畜産学者") && this.res_find("鶏").num > 0 && this.res_find("羊").num > 0 && this.res_find("豚").num > 0 && this.res_find("牛").num > 0){
-        this.res_find("勝利点").num += 12
+        this.memoVP("畜産学者",12)
       }
       if(this.worker_find("測量士") && this.fields.length >= 7){
-        this.res_find("勝利点").num += 30
+        this.memoVP("測量士",30)
       }
       if(this.worker_find("牧師")){
         if(this.res_find("物乞い").num > 5){this.res_find("物乞い").num -= 5}
         else{this.res_find("物乞い").num = 0}
       }
+    },
+
+    memoVP(name,pt){
+      this.res_find("勝利点").num += pt
+      this.vp_find(name).num += pt
+    },
+
+    showVP(vp){
+      if(vp.num != 0){return true}
+      else{return false}
     },
 
     usedCommand: function(name){
