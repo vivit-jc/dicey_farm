@@ -60,11 +60,11 @@ const app = {
       ],
       commands: [
         {name:"釣り",des:"魚を(N-2)個得る（最低1）"},
-        {name:"畑を耕す1",des:"畑を1つ増やす"},
-        {name:"畑を耕す2",des:"1と同じ目しか置けない"},
+        {name:"畑を耕す",des:"畑を1つ増やす 同じ目なら2回可能"},
         {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
+        {name:"募集",des:"職人を4枚引いてN枚捨てる"},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
         {name:"日雇い労働",des:"食料3を得る"}
@@ -214,15 +214,16 @@ const app = {
         if(this.worker_find("釣り人")){c += 3}
         this.res_find("魚").num += c
       
-      } else if(n === "畑を耕す1"){
-        this.field_die = this.holdingDie.num
+      } else if(n === "畑を耕す"){
+        if(this.field_die){ //2回目の場合
+          if(this.field_die != this.holdingDie.num){return false}
+        } else { //1回目の場合
+          this.field_die = this.holdingDie.num
+          repeatable = true
+        }
         this.fields.push({kind:"空き"})
         if(this.worker_find("牛飼い") && this.res_find("牛")>0){this.fields.push({kind:"空き"})}
 
-      } else if(n === "畑を耕す2"){
-        if(this.field_die != this.holdingDie.num){return false}
-        this.fields.push({kind:"空き"})
-      
       } else if(n === "商人" || n === "行商人" || n === "家畜商人" || n === "園芸商人" || n === "食材商人"){
         let item
         if(n === "商人"){item = this.items[this.holdingDie.num-1]}
@@ -250,11 +251,20 @@ const app = {
         this.status = "contract"
         this.cost = this.holdingDie.num
         if(this.worker_find("斡旋業者")){this.cost = 1}
-      
+
+      } else if(n === "募集"){
+        if(this.holdingDie.num > this.workers.length+4){return false}
+        for(let i=0;i<4;i++){
+          this.workers.push(this.workers_deck.pop())
+        }
+        this.rest = this.holdingDie.num
+        this.status = "trash_worker"
+
       } else if(n === "出荷"){
         this.rest = this.holdingDie.num+2
         if(this.worker_find("荷運び")){this.rest += 3}
         this.status = "market"
+        if(this.turn === 8){repeatable = true}
       
       } else if(n === "増築"){
         if(this.worker_find("大工")){}
@@ -281,7 +291,7 @@ const app = {
       } else {
         return false
       }
-      if(!(repeatable || (this.turn === 8 && n === "出荷"))){this.usedCommands.push(command.name)}
+      if(!repeatable){this.usedCommands.push(command.name)}
       this.deleteDie()
     },
 
@@ -337,6 +347,11 @@ const app = {
         this.merchants_str.push("食材商人")
         console.log(this.merchants,this.merchants_str)
       }
+    },
+
+    trashWorker: function(worker){
+      this.workers.splice(this.workers.indexOf(worker), 1)
+      this.decRest()
     },
 
     makeFacility: function(facility){
