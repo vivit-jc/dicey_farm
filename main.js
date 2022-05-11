@@ -64,7 +64,7 @@ const app = {
         {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
-        {name:"募集",des:"職人を4人引いてNにｎ捨てる"},
+        {name:"募集",des:"職人を4人引いてN人捨てる"},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
         {name:"日雇い労働",des:"食料3を得る"}
@@ -81,6 +81,7 @@ const app = {
         {name:"食材商人",des:"買い物スロットを追加",cost:1},
         {name:"養蜂家",des:"麦、野菜、花の収穫時に得る種+1",cost:1},
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",cost:1},
+        {name:"羊飼い",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:1},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
         {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",cost:1},
         {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1},
@@ -444,6 +445,9 @@ const app = {
       animals.forEach(e => {
         animal_num += this.res_find(e.a).num
         this.res_find(e.b).num += this.res_find(e.a).num
+        if(e.a === "羊" && this.worker_find("羊飼い")){
+          this.res_find(e.b).num += Math.floor(this.res_find(e.a).num/2)
+        }
       })
       if(this.worker_find("堆肥小屋")){
         if(animal_num >= 5){compost = 2}
