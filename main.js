@@ -79,19 +79,19 @@ const app = {
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
         {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",cost:1},
         {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1},
-        {name:"菓子職人",des:"麦、卵、牛乳を6VPに変える",cost:1,change:true},
+        {name:"菓子職人",des:"麦、卵、牛乳を7VPに変える",cost:1,change:true},
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",cost:1,change:true},
-        {name:"チーズ職人",des:"牛乳を2VPに変える",cost:1,change:true},
+        {name:"チーズ職人",des:"牛乳を4VPに変える",cost:1,change:true},
         {name:"精肉屋",des:"家畜を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:1},
-        {name:"ハム職人",des:"豚を6VPに変える",cost:1,change:true},
-        {name:"仕立て屋",des:"3羊毛を7VPに変える",cost:1,change:true},
+        {name:"ハム職人",des:"豚を7VPに変える",cost:1,change:true},
+        {name:"仕立て屋",des:"3羊毛を6VPに変える",cost:1,change:true},
         {name:"花屋",des:"花を4VPに変える",cost:1,change:true},
         {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1},
         {name:"料理人",des:"魚、肉、野菜を10VPに変える",cost:1},
         {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば12VP",cost:1},
-        {name:"測量士",des:"ゲーム終了時、畑が7以上あれば30VP",cost:1},
+        {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",cost:1},
         {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",cost:1},
       ],
@@ -525,7 +525,7 @@ const app = {
         let r = this.res_find("豚")
         if(r.num === 0){return false}
         r.num -= 1
-        this.memoVP("ハム職人",6)
+        this.memoVP("ハム職人",7)
       } else if(name === "ウィスキー職人"){
         let r = this.res_find("麦")
         if(r.num < 2){return false}
@@ -540,26 +540,26 @@ const app = {
         let r = this.res_find("牛乳")
         if(r.num === 0){return false}
         r.num -= 1
-        this.memoVP("チーズ職人",2)
+        this.memoVP("チーズ職人",4)
       } else if(name === "仕立て屋"){
         let r = this.res_find("羊毛")
         if(r.num < 3){return false}
         r.num -= 3
-        this.memoVP("仕立て屋",7)
+        this.memoVP("仕立て屋",6)
       } else if(name === "菓子職人"){
         let a = this.res_find("麦"),b = this.res_find("牛乳"),c = this.res_find("卵")
         if(a.num === 0 || b.num === 0 || c.num === 0){return false}
         a.num -= 1
         b.num -= 1
         c.num -= 1
-        this.memoVP("菓子職人",6)
+        this.memoVP("菓子職人",7)
       } else if(name === "料理人"){
         let a = this.res_find("魚"),b = this.res_find("肉"),c = this.res_find("野菜")
         if(a.num === 0 || b.num === 0 || c.num === 0){return false}
         a.num -= 1
         b.num -= 1
         c.num -= 1
-        this.memoVP("料理人",9)
+        this.memoVP("料理人",10)
       }
       this.decRest()
     },
@@ -779,7 +779,7 @@ const app = {
       if(this.worker_find("畜産学者") && this.res_find("鶏").num > 0 && this.res_find("羊").num > 0 && this.res_find("豚").num > 0 && this.res_find("牛").num > 0){
         this.memoVP("畜産学者",12)
       }
-      if(this.worker_find("測量士") && this.fields.length >= 7){
+      if(this.worker_find("測量士") && this.fields.length >= 8){
         this.memoVP("測量士",30)
       }
       if(this.worker_find("牧師")){
