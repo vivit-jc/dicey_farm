@@ -776,9 +776,6 @@ const app = {
     },
 
     countWorkerVP: function(){
-      if(this.worker_find("会計士")){
-        this.memoVP("会計士",Math.floor(this.res_find("勝利点").num/5))
-      }
       if(this.worker_find("畜産学者") && this.res_find("鶏").num > 0 && this.res_find("羊").num > 0 && this.res_find("豚").num > 0 && this.res_find("牛").num > 0){
         this.memoVP("畜産学者",12)
       }
@@ -788,6 +785,9 @@ const app = {
       if(this.worker_find("牧師")){
         if(this.res_find("物乞い").num > 5){this.res_find("物乞い").num -= 5}
         else{this.res_find("物乞い").num = 0}
+      }
+      if(this.worker_find("会計士")){
+        this.memoVP("会計士",Math.floor(this.res_find("勝利点").num/5))
       }
     },
 
