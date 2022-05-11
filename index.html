@@ -44,7 +44,7 @@
         <div class="col">
           <div class="row space" id="dice_space" v-show="!endGame">
             {{turn}}ラウンド目  {{turn_seq}}
-            <ul class="list-group list-group-horizontal" >
+            <ul class="list-group list-group-horizontal">
               <li class="list-group-item" v-for="die in dice" v-bind:class="[{hover:activeItem===die},{hold:holdingDie===die}]" @mouseover="activeItem=die" @mouseout="activeItem=''"  v-on:click="click_die(die)">
                 <img :src=dice_img(die.num) class="die">
               </li>
@@ -57,6 +57,9 @@
           <div class="row space" id="dice_space" v-show="endGame">
             最終得点：{{res_find("勝利点").num}}
             <div><button @click="initGame()" class="rounded-pill btn-sm">もう一度遊ぶ</button></div>
+            <ul class="list-group list-group-horizontal">
+              <li class="list-group-item small" v-for="(rank, index) in ranks">{{rank_str(index)}}:{{rank}}</li>
+            </ul>
           </div>
           <div class="row space" id="action_space">
             <ul class="list-group list-group-horizontal" >

@@ -16,6 +16,7 @@ const app = {
     return {
       viewStatus: "game",
       turn:1,
+      ranks:[],
       status:"",
       rest:0,
       cost:0,
@@ -290,11 +291,13 @@ const app = {
 
       this.memoVP("ウィスキー",this.res_find("ウィスキー").num)
 
-      if(this.turn === 3){
+      if(this.turn === 8){
         this.endGame = true
         this.memoVP("宝石",this.res_find("宝石").num*5)
         this.countWorkerVP()
         this.memoVP("物乞い",(this.res_find("物乞い").num*3)*(-1))
+
+        this.saveScore()
         return true;
       }
 
@@ -787,6 +790,20 @@ const app = {
       return this.usedCommands.find(e => e === name);
     },
 
+    saveScore(){
+      let rankdata = []
+      if(!localStorage.getItem("dicey_farm_score")){rankdata = [0,0,0,0,0,0,0,0,0,0,0,0]}
+      else{rankdata = localStorage.getItem("dicey_farm_score").split(',').map(Number);}
+      let score = this.res_find("勝利点").num-1
+      if(score < 0){score = 0}
+      else if(Math.floor(score/10) >= 10){score = 11}
+      else{score = Math.floor(score/10)+1}
+      rankdata[score] += 1
+      localStorage.setItem('dicey_farm_score', rankdata)
+      this.ranks = rankdata
+      console.log(this.ranks)
+    },
+
     selectItem: function(item){
       this.selectedItem = item;
     },
@@ -803,6 +820,12 @@ const app = {
 
     returnGame: function(){
       this.viewStatus = "game"
+    },
+
+    rank_str(index){
+      if(index == 0){return "~0"}
+      else if(index === 11){return "101~"}
+      else{return (index*10-9)+"~"+index*10}
     },
 
     decRest(){
