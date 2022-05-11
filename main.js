@@ -95,6 +95,7 @@ const app = {
         {name:"料理人",des:"魚、肉、野菜を10VPに変える",cost:1},
         {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
+        {name:"夜警",des:"ダイス1つの目を2か5にする",cost:1,dice:true},
         {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば12VP",cost:1},
         {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",cost:1},
         {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
@@ -492,6 +493,8 @@ const app = {
         return ["ひっくり返す"]
       } else if(name === "長老"){
         return ["+1","-1"]
+      } else if(name === "夜警"){
+        return ["2","5"]  
       } else if(name === "精肉屋"){
         return ["鶏>肉2","羊>肉4","豚>肉6","牛>肉8"]
       } else if(name === "パン職人"){
@@ -716,6 +719,15 @@ const app = {
 
       } else if(n === "役人"){
         this.dice.push({num:7-this.holdingDie.num})
+        this.usedCommands.push(worker.name)
+        this.deleteDie()
+
+      } else if(n === "夜警"){
+        if(button === "2"){
+          this.dice.push({num:2})
+        } else if(button === "5"){
+          this.dice.push({num:5})
+        }
         this.usedCommands.push(worker.name)
         this.deleteDie()
 
