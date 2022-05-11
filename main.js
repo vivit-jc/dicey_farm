@@ -25,6 +25,8 @@ const app = {
       holdingDie:"",
       field_die:"",
       endGame:false,
+      merchants:[],
+      merchants_str:["商人"],
       usedCommands:[],
       dice: [],
       workers: [],
@@ -73,7 +75,10 @@ const app = {
         {name:"荷運び",des:"出荷の回数+3",cost:1},
         {name:"斡旋業者",des:"契約時の食料コストが常に1になる",cost:1},
         {name:"大工",des:"どのダイスでも増築できる",cost:1},
-        {name:"行商人",des:"商人とは別の買い物スロットを追加",cost:1},
+        {name:"行商人",des:"買い物スロットを追加",cost:1},
+        {name:"家畜商人",des:"買い物スロットを追加",cost:1},
+        {name:"園芸商人",des:"買い物スロットを追加",cost:1},
+        {name:"食材商人",des:"買い物スロットを追加",cost:1},
         {name:"養蜂家",des:"麦、野菜、花の収穫時に得る種+1",cost:1},
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",cost:1},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
@@ -96,14 +101,17 @@ const app = {
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",cost:1},
       ],
       items: [
-        {name:"麦の種",kind:"wheat_seed",num:2},
-        {name:"野菜の種",kind:"vegetable_seed",num:2},
-        {name:"花の種",kind:"flower_seed",num:2},
-        {name:"鶏",kind:"chiken",num:1},
-        {name:"豚",kind:"pig",num:1},
-        {name:"羊",kind:"sheep",num:1},
+        {name:"麦の種",num:2},
+        {name:"野菜の種",num:2},
+        {name:"花の種",num:2},
+        {name:"鶏",num:1},
+        {name:"豚",num:1},
+        {name:"羊",num:1},
       ],
       items2:[],
+      items_animal:[],
+      items_seeds:[],
+      items_foods:[],
       facilities: [
         {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
         {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
@@ -169,6 +177,7 @@ const app = {
 
   created() {
     this.shuffle(this.items)
+    this.merchants.push(this.items)
     this.shuffle(this.workers_deck)
 
     for(let i=0;i<2;i++){
@@ -179,7 +188,7 @@ const app = {
       this.workers.push(this.workers_deck.pop())
     }
 
-    console.log("Dicey Farm ver 0.4")
+    console.log("Dicey Farm ver 0.5")
 
     this.fields.push({kind:"空き"})
     //this.fields.push({kind:"空き"})
@@ -213,10 +222,14 @@ const app = {
         if(this.field_die != this.holdingDie.num){return false}
         this.fields.push({kind:"空き"})
       
-      } else if(n === "商人" || n === "行商人"){
+      } else if(n === "商人" || n === "行商人" || n === "家畜商人" || n === "園芸商人" || n === "食材商人"){
         let item
         if(n === "商人"){item = this.items[this.holdingDie.num-1]}
         else if(n === "行商人"){item = this.items2[this.holdingDie.num-1]}
+        else if(n === "家畜商人"){item = this.items_animal[this.holdingDie.num-1]}
+        else if(n === "園芸商人"){item = this.items_seeds[this.holdingDie.num-1]}
+        else if(n === "食材商人"){item = this.items_foods[this.holdingDie.num-1]}
+          
         if(this.isAnimal(this.res_find(item.name))){ //動物を買う場合
           if(!this.existEmptyFieldForAnimal(item.name)){return false;}
           if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
@@ -295,9 +308,33 @@ const app = {
       this.cost = 0
       if(worker.name === "行商人"){
         this.items2 = this.items.slice()
-        if(this.turn < 3){this.items2.push({name:"牛",kind:"cow",num:1})} //行商人は1,2ターン目でも牛を出す
-        this.items2.push({name:"宝石",kind:"jewel",num:1})
+        if(this.turn < 3){this.items2.push({name:"牛",num:1})} //行商人は1,2ターン目でも牛を出す
+        this.items2.push({name:"宝石",num:1})
         this.shuffle(this.items2)
+        this.merchants.push(this.items2)
+        this.merchants_str.push("行商人")
+        console.log(this.merchants,this.merchants_str)
+        
+      } else if(worker.name === "家畜商人"){
+        this.items_animal = [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"豚",num:2}]
+        this.shuffle(this.items_animal)
+        this.merchants.push(this.items_animal)
+        this.merchants_str.push("家畜商人")
+        console.log(this.merchants,this.merchants_str)
+
+      } else if(worker.name === "園芸商人"){
+        this.items_seeds = [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"麦の種",num:3},{name:"野菜の種",num:3},{name:"花の種",num:3}]
+        this.shuffle(this.items_seeds)
+        this.merchants.push(this.items_seeds)
+        this.merchants_str.push("園芸商人")
+        console.log(this.merchants,this.merchants_str)
+
+      } else if(worker.name === "食材商人"){
+        this.items_foods = [{name:"牛乳",num:2},{name:"卵",num:2},{name:"魚",num:2},{name:"麦",num:2},{name:"肉",num:1},{name:"野菜",num:2}]
+        this.shuffle(this.items_foods)
+        this.merchants.push(this.items_foods)
+        this.merchants_str.push("食材商人")
+        console.log(this.merchants,this.merchants_str)
       }
     },
 
@@ -346,9 +383,13 @@ const app = {
       this.usedCommands = []
       this.workers.splice(0, 2)
       
-      if(this.turn === 3){this.items.push({name:"牛",kind:"cow",num:1})} //牛は3ターン目から出る
+      if(this.turn === 3){this.items.push({name:"牛",num:1})} //牛は3ターン目から出る
       this.shuffle(this.items)
       this.shuffle(this.items2)
+      this.shuffle(this.items_animal)
+      this.shuffle(this.items_seeds)
+      this.shuffle(this.items_foods)
+
       for(let i=0;i<this.aot[this.turn-1];i++){
         this.dice.push({num:Math.floor(Math.random()*6)+1})
       }
@@ -382,6 +423,8 @@ const app = {
       let w = this.worker_find("養蜂家")
       let animal_num = 0
       let compost = 0
+      
+      animal_num += this.res_find("豚").num
       animals.forEach(e => {
         animal_num += this.res_find(e.a).num
         this.res_find(e.b).num += this.res_find(e.a).num
@@ -389,6 +432,7 @@ const app = {
       if(this.worker_find("堆肥小屋")){
         if(animal_num >= 5){compost = 2}
         else if(animal_num >= 2){compost = 1}
+        console.log("compost "+compost)
       }
       this.fields.forEach(e => {
         if(e.kind === "麦の種"){

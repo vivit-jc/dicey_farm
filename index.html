@@ -75,20 +75,11 @@
               </li>
             </ul>
           </div>
-          <div class="row space" id="merchant_space">
-            本日の商品
+          <div class="row space merchant" v-for="(items, index) in merchants">
+            {{merchants_str[index]}}
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item" v-for="(item, index) in items" :key="item" v-show="index<6">
-                <img class="merchant_dice" :src="dice_img(index+1)">
-                {{item.name}}x{{item.num}}
-              </li>
-            </ul>
-          </div>
-          <div class="row space" id="merchant_space2" v-show="worker_find('行商人')">
-            本日の商品(行商人)
-            <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item" v-for="(item, index) in items2" :key="item" v-show="index<6">
-                <img class="merchant_dice" :src="dice_img(index+1)">
+              <li class="list-group-item" v-for="(item, index2) in items" :key="item" v-show="index2<6">
+                <img class="merchant_dice" :src="dice_img(index2+1)">
                 {{item.name}}x{{item.num}}
               </li>
             </ul>
