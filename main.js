@@ -93,7 +93,7 @@ const app = {
         {name:"仕立て屋",des:"3羊毛を6VPに変える",cost:1,change:true},
         {name:"花屋",des:"花を4VPに変える",cost:1,change:true},
         {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1},
-        {name:"料理人",des:"魚、肉、野菜を10VPに変える",cost:1},
+        {name:"料理人",des:"魚、肉、野菜を10VPに変える",cost:1,change:true},
         {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"夜警",des:"ダイス1つの目を2か5にする",cost:1,dice:true},
@@ -118,7 +118,7 @@ const app = {
         {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
         {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
         {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
-        {name:"堆肥小屋",des:"家畜が2~4頭なら、麦、野菜、花の収穫量+1、5頭以上なら+2",cost:0},
+        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0},
         {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
       ],
       vps:[
@@ -450,8 +450,8 @@ const app = {
         }
       })
       if(this.worker_find("堆肥小屋")){
-        if(animal_num >= 5){compost = 2}
-        else if(animal_num >= 2){compost = 1}
+        if(animal_num >= 4){compost = 2}
+        else if(animal_num >= 1){compost = 1}
         console.log("compost "+compost)
       }
       this.fields.forEach(e => {
