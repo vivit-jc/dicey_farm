@@ -56,6 +56,7 @@
           </div>
           <div class="row space" id="dice_space" v-show="endGame">
             最終得点：{{res_find("勝利点").num}}
+            <div><button @click="initGame()" class="rounded-pill btn-sm">もう一度遊ぶ</button></div>
           </div>
           <div class="row space" id="action_space">
             <ul class="list-group list-group-horizontal" >

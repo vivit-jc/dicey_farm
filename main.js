@@ -30,34 +30,13 @@ const app = {
       usedCommands:[],
       dice: [],
       workers: [],
+      workers_deck: [],
       contracted:[],
       fields: [],
       resCooking: "",
       fast_seeding_kind: "",
       aot:[2,2,3,3,3,4,4,4],
-      resources: [
-        {name:"勝利点",num:0},
-        {name:"物乞い",num:0},
-        {name:"食料",num:3},
-        {name:"魚",num:0,rot:"▲"},
-        {name:"麦",num:0},
-        {name:"野菜",num:0,rot:"▲"},
-        {name:"花",num:0,rot:"▲"},
-        {name:"麦の種",num:0},
-        {name:"野菜の種",num:0},
-        {name:"花の種",num:0},
-        {name:"鶏",num:0},
-        {name:"羊",num:0},
-        {name:"豚",num:0},
-        {name:"牛",num:0},
-        {name:"肉",num:0,rot:"▲"},
-        {name:"卵",num:0,rot:"▲"},
-        {name:"牛乳",num:0,rot:"▲"},
-        {name:"バター",num:0},
-        {name:"羊毛",num:0},
-        {name:"ウィスキー",num:0},
-        {name:"宝石",num:0},
-      ],
+      resources: [],
       commands: [
         {name:"釣り",des:"魚を(N-2)個得る（最低1）"},
         {name:"畑を耕す",des:"畑を1つ増やす 同じ目なら2回可能"},
@@ -69,75 +48,13 @@ const app = {
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
         {name:"日雇い労働",des:"食料3を得る"}
       ],
-      workers_deck: [
-        //変換方法が複数ある職人はchange:trueを付けないことに注意
-        {name:"釣り人",des:"釣りで得る魚+3",cost:1},
-        {name:"荷運び",des:"出荷の回数+3",cost:1},
-        {name:"斡旋業者",des:"契約時の食料コストが常に1になる",cost:1},
-        {name:"大工",des:"どのダイスでも増築できる",cost:1},
-        {name:"行商人",des:"買い物スロットを追加",cost:1},
-        {name:"家畜商人",des:"買い物スロットを追加",cost:1},
-        {name:"園芸商人",des:"買い物スロットを追加",cost:1},
-        {name:"食材商人",des:"買い物スロットを追加",cost:1},
-        {name:"養蜂家",des:"麦、野菜、花の収穫時に得る種+1",cost:1},
-        {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",cost:1},
-        {name:"羊飼い",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:1},
-        {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
-        {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",cost:1},
-        {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1},
-        {name:"菓子職人",des:"麦、卵、牛乳を7VPに変える",cost:1,change:true},
-        {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",cost:1,change:true},
-        {name:"チーズ職人",des:"牛乳を4VPに変える",cost:1,change:true},
-        {name:"精肉屋",des:"家畜を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:1},
-        {name:"ハム職人",des:"豚を7VPに変える",cost:1,change:true},
-        {name:"仕立て屋",des:"3羊毛を6VPに変える",cost:1,change:true},
-        {name:"花屋",des:"花を4VPに変える",cost:1,change:true},
-        {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1},
-        {name:"料理人",des:"魚、肉、野菜を10VPに変える",cost:1,change:true},
-        {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
-        {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
-        {name:"夜警",des:"ダイス1つの目を2か5にする",cost:1,dice:true},
-        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば12VP",cost:1},
-        {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",cost:1},
-        {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
-        {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",cost:1},
-      ],
-      items: [
-        {name:"麦の種",num:2},
-        {name:"野菜の種",num:2},
-        {name:"花の種",num:2},
-        {name:"鶏",num:1},
-        {name:"豚",num:1},
-        {name:"羊",num:1},
-      ],
+      items: [],
       items2:[],
       items_animal:[],
       items_seeds:[],
       items_foods:[],
-      facilities: [
-        {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
-        {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
-        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
-        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0},
-        {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
-      ],
-      vps:[
-        {name:"市場",num:0},
-        {name:"ウィスキー",num:0},
-        {name:"宝石",num:0},
-        {name:"パン職人",num:0},
-        {name:"菓子職人",num:0},
-        {name:"チーズ職人",num:0},
-        {name:"ハム職人",num:0},
-        {name:"仕立て屋",num:0},
-        {name:"ソーセージ職人",num:0},
-        {name:"花屋",num:0},
-        {name:"料理人",num:0},
-        {name:"測量士",num:0},
-        {name:"畜産学者",num:0},
-        {name:"会計士",num:0},
-        {name:"物乞い",num:0},
-      ]
+      facilities: [],
+      vps:[]
     }
   },
 
@@ -178,22 +95,8 @@ const app = {
   },
 
   created() {
-    this.shuffle(this.items)
-    this.merchants.push(this.items)
-    this.shuffle(this.workers_deck)
-
-    for(let i=0;i<2;i++){
-      this.dice.push({num:Math.floor(Math.random()*6)+1})
-    }
-
-    for(let i=0;i<6;i++){
-      this.workers.push(this.workers_deck.pop())
-    }
-
     console.log("Dicey Farm ver 0.5")
-
-    this.fields.push({kind:"空き"})
-    //this.fields.push({kind:"空き"})
+    this.initGame()
   },
 
   methods: {
@@ -387,7 +290,7 @@ const app = {
 
       this.memoVP("ウィスキー",this.res_find("ウィスキー").num)
 
-      if(this.turn === 8){
+      if(this.turn === 3){
         this.endGame = true
         this.memoVP("宝石",this.res_find("宝石").num*5)
         this.countWorkerVP()
@@ -913,6 +816,123 @@ const app = {
         [array[i], array[j]] = [array[j], array[i]];
       }
     },
+
+    initGame(){
+      this.workers = []
+      this.turn = 1
+      this.endGame = false
+      this.merchants = []
+      this.merchants_str = ["商人"]
+      this.workers = []
+      this.contracted = []
+      this.fields = [{kind:"空き"}]
+      this.field_die = ""
+      this.usedCommands = []
+      this.items2 = []
+      this.items_animal = []
+      this.items_seeds = []
+      this.items_foods = []
+      this.resources = [
+        {name:"勝利点",num:0},
+        {name:"物乞い",num:0},
+        {name:"食料",num:3},
+        {name:"魚",num:0,rot:"▲"},
+        {name:"麦",num:0},
+        {name:"野菜",num:0,rot:"▲"},
+        {name:"花",num:0,rot:"▲"},
+        {name:"麦の種",num:0},
+        {name:"野菜の種",num:0},
+        {name:"花の種",num:0},
+        {name:"鶏",num:0},
+        {name:"羊",num:0},
+        {name:"豚",num:0},
+        {name:"牛",num:0},
+        {name:"肉",num:0,rot:"▲"},
+        {name:"卵",num:0,rot:"▲"},
+        {name:"牛乳",num:0,rot:"▲"},
+        {name:"バター",num:0},
+        {name:"羊毛",num:0},
+        {name:"ウィスキー",num:0},
+        {name:"宝石",num:0},
+      ]
+      this.workers_deck = [
+        //変換方法が複数ある職人はchange:trueを付けないことに注意
+        {name:"釣り人",des:"釣りで得る魚+3",cost:1},
+        {name:"荷運び",des:"出荷の回数+3",cost:1},
+        {name:"斡旋業者",des:"契約時の食料コストが常に1になる",cost:1},
+        {name:"大工",des:"どのダイスでも増築できる",cost:1},
+        {name:"行商人",des:"買い物スロットを追加",cost:1},
+        {name:"家畜商人",des:"買い物スロットを追加",cost:1},
+        {name:"園芸商人",des:"買い物スロットを追加",cost:1},
+        {name:"食材商人",des:"買い物スロットを追加",cost:1},
+        {name:"養蜂家",des:"麦、野菜、花の収穫時に得る種+1",cost:1},
+        {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",cost:1},
+        {name:"羊飼い",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:1},
+        {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
+        {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",cost:1},
+        {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1},
+        {name:"菓子職人",des:"麦、卵、牛乳を7VPに変える",cost:1,change:true},
+        {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",cost:1,change:true},
+        {name:"チーズ職人",des:"牛乳を4VPに変える",cost:1,change:true},
+        {name:"精肉屋",des:"家畜を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:1},
+        {name:"ハム職人",des:"豚を7VPに変える",cost:1,change:true},
+        {name:"仕立て屋",des:"3羊毛を6VPに変える",cost:1,change:true},
+        {name:"花屋",des:"花を4VPに変える",cost:1,change:true},
+        {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",cost:1},
+        {name:"料理人",des:"魚、肉、野菜を10VPに変える",cost:1,change:true},
+        {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
+        {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
+        {name:"夜警",des:"ダイス1つの目を2か5にする",cost:1,dice:true},
+        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば12VP",cost:1},
+        {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",cost:1},
+        {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
+        {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",cost:1},
+      ]
+      this.items = [
+        {name:"麦の種",num:2},
+        {name:"野菜の種",num:2},
+        {name:"花の種",num:2},
+        {name:"鶏",num:1},
+        {name:"豚",num:1},
+        {name:"羊",num:1},
+      ]
+      this.facilities = [
+        {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
+        {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
+        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
+        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0},
+        {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
+      ]
+      this.vps = [
+        {name:"市場",num:0},
+        {name:"ウィスキー",num:0},
+        {name:"宝石",num:0},
+        {name:"パン職人",num:0},
+        {name:"菓子職人",num:0},
+        {name:"チーズ職人",num:0},
+        {name:"ハム職人",num:0},
+        {name:"仕立て屋",num:0},
+        {name:"ソーセージ職人",num:0},
+        {name:"花屋",num:0},
+        {name:"料理人",num:0},
+        {name:"測量士",num:0},
+        {name:"畜産学者",num:0},
+        {name:"会計士",num:0},
+        {name:"物乞い",num:0},
+      ]
+
+      this.shuffle(this.items)
+      this.merchants.push(this.items)
+      this.shuffle(this.workers_deck)
+
+      for(let i=0;i<2;i++){
+        this.dice.push({num:Math.floor(Math.random()*6)+1})
+      }
+
+      for(let i=0;i<6;i++){
+        this.workers.push(this.workers_deck.pop())
+      }
+    }
 
   }
 }
