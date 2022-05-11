@@ -108,7 +108,7 @@ const app = {
         {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
         {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
         {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
-        {name:"毛刈り小屋",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",cost:0},
+        {name:"堆肥小屋",des:"家畜が2~4頭なら、麦、野菜、花の収穫量+1、5頭以上なら+2",cost:0},
         {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
       ],
       vps:[
@@ -380,23 +380,27 @@ const app = {
     growPlantsAndAnimals: function(){
       let animals = [{a:"鶏",b:"卵"},{a:"羊",b:"羊毛"},{a:"牛",b:"牛乳"}]
       let w = this.worker_find("養蜂家")
+      let animal_num = 0
+      let compost = 0
       animals.forEach(e => {
+        animal_num += this.res_find(e.a).num
         this.res_find(e.b).num += this.res_find(e.a).num
-        if(e.a === "羊" && this.worker_find("毛刈り小屋")){
-          this.res_find(e.b).num += Math.floor(this.res_find(e.a).num/2)
-        }
       })
+      if(this.worker_find("堆肥小屋")){
+        if(animal_num >= 5){compost = 2}
+        else if(animal_num >= 2){compost = 1}
+      }
       this.fields.forEach(e => {
         if(e.kind === "麦の種"){
-          this.res_find("麦").num += 3;
+          this.res_find("麦").num += 3 + compost;
           this.res_find("麦の種").num += 1
           if(w){this.res_find("麦の種").num += 1}
         } else if(e.kind === "野菜の種"){
-          this.res_find("野菜").num += 2;
+          this.res_find("野菜").num += 2 + compost;
           this.res_find("野菜の種").num += 1;
           if(w){this.res_find("野菜の種").num += 1}
         }else if(e.kind === "花の種"){
-          this.res_find("花").num += 2
+          this.res_find("花").num += 2 + compost
           if(w){this.res_find("花の種").num += 1}
         }
         if(!this.isAnimal(e.kind)){e.kind = "空き"}
