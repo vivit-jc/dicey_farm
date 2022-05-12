@@ -138,7 +138,7 @@ const app = {
           repeatable = true
         }
         this.fields.push({kind:"空き"})
-        if(this.worker_find("牛飼い") && this.res_find("牛")>0){this.fields.push({kind:"空き"})}
+        if(this.worker_find("牛飼い") && this.res_find("牛").num>0){this.fields.push({kind:"空き"})}
 
       } else if(n === "商人" || n === "行商人" || n === "家畜商人" || n === "園芸商人" || n === "食材商人"){
         let item
