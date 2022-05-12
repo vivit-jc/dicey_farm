@@ -12,6 +12,9 @@
     <div class="right">
       制作：vivit_jc
     </div>
+    <transition>
+      <div class="alert alert-danger fade show center" id="alertmsg" role="alert" v-show="showAlert">{{alert_str}}</div>
+    </transition>
     <div class="center"  v-show="viewStatus==='howtoplay'">
       <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
       <img src="info.png">

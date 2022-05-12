@@ -15,6 +15,8 @@ const app = {
   data() {
     return {
       viewStatus: "game",
+      showAlert:false,
+      alert_str:"",
       turn:1,
       ranks:[],
       status:"",
@@ -127,7 +129,10 @@ const app = {
       
       } else if(n === "畑を耕す"){
         if(this.field_die){ //2回目の場合
-          if(this.field_die != this.holdingDie.num){return false}
+          if(this.field_die != this.holdingDie.num){
+            this.addAlert("同じ目のダイス("+this.field_die+")のみ使えます")
+            return false
+          }
         } else { //1回目の場合
           this.field_die = this.holdingDie.num
           repeatable = true
@@ -144,7 +149,10 @@ const app = {
         else if(n === "食材商人"){item = this.items_foods[this.holdingDie.num-1]}
           
         if(this.isAnimal(this.res_find(item.name))){ //動物を買う場合
-          if(!this.existEmptyFieldForAnimal(item.name)){return false;}
+          if(!this.existEmptyFieldForAnimal(item.name)){
+            this.addAlert("新しい家畜を買うための空いた畑がありません")
+            return false;
+          }
           if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
         }
         this.res_find(item.name).num += item.num
@@ -152,19 +160,28 @@ const app = {
         if(this.worker_find("種まき人")) {this.fast_seeding(this.res_find(item.name))}
       
       } else if(n === "種を蒔く"){
-        if(!this.empty_field){return false}
+        if(!this.empty_field){
+          this.addAlert("空いている畑がありません")
+          return false
+        }
         this.status = "seeding"
         this.rest = this.holdingDie.num
       
       } else if(n === "契約"){
         if(this.worker_find("斡旋業者") && this.res_find("食料").num > 0){}
-        else if(this.res_find("食料").num < this.holdingDie.num){return false}
+        else if(this.res_find("食料").num < this.holdingDie.num){
+          this.addAlert("食料が足りません")
+          return false
+        }
         this.status = "contract"
         this.cost = this.holdingDie.num
         if(this.worker_find("斡旋業者")){this.cost = 1}
 
       } else if(n === "募集"){
-        if(this.holdingDie.num > this.workers.length+4){return false}
+        if(this.holdingDie.num > this.workers.length+4){
+          this.addAlert("捨てる人数が多すぎます")
+          return false
+        }
         for(let i=0;i<4;i++){
           this.workers.push(this.workers_deck.pop())
         }
@@ -179,7 +196,10 @@ const app = {
       
       } else if(n === "増築"){
         if(this.worker_find("大工")){}
-        else if(this.holdingDie.num != 6){return false}
+        else if(this.holdingDie.num != 6){
+          this.addAlert("6のダイスのみ使えます")
+          return false
+        }
         this.status = "facility"
 
       } else if(n === "日雇い労働"){
@@ -195,6 +215,7 @@ const app = {
 
       } else if(n === "解体小屋"){
         if(this.res_find("鶏").num === 0 && this.res_find("羊").num === 0 && this.res_find("豚").num === 0 && this.res_find("牛").num === 0){
+          this.addAlert("家畜が一頭もいません")
           return false
         }
         this.status = "butchering"
@@ -639,10 +660,16 @@ const app = {
       let n = worker.name
       if(n === "長老"){
         if(button === "+1"){
-          if(this.holdingDie.num === 6){return false}
+          if(this.holdingDie.num === 6){
+            this.addAlert("6のダイスは+1できません")
+            return false
+          }
           this.dice.push({num:this.holdingDie.num+1})
         } else if(button === "-1"){
-          if(this.holdingDie.num === 1){return false}
+          if(this.holdingDie.num === 1){
+            this.addAlert("1のダイスは-1できません")
+            return false
+          }
           this.dice.push({num:this.holdingDie.num-1})
         }
         this.usedCommands.push(worker.name)
@@ -836,6 +863,15 @@ const app = {
     decRest(){
       this.rest -= 1
       if(this.rest === 0){this.status = ""}
+    },
+
+    addAlert(msg){
+      this.alert_str = msg
+      this.showAlert = true
+      setTimeout(() => {
+        this.alert_str = ""
+        this.showAlert = false
+      }, 4000);
     },
 
     shuffle: function(array){

@@ -135,3 +135,15 @@ h1: {
 .vp_list {
   background-color: #bce2e8 !important;
 }
+
+.v-leave-active {
+    transition: opacity 3s;
+}
+
+.v-leave {
+    opacity: 1;
+}
+
+.v-leave-to {
+    opacity: 0;
+}
