@@ -12,7 +12,6 @@
     <div class="right">
       制作：vivit_jc
     </div>
-
     <div class="center"  v-show="viewStatus==='howtoplay'">
       <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
       <img src="info.png">
@@ -58,7 +57,7 @@
             最終得点：{{res_find("勝利点").num}}
             <div><button @click="initGame()" class="rounded-pill btn-sm">もう一度遊ぶ</button></div>
             <ul class="list-group list-group-horizontal">
-              <li class="list-group-item small" v-for="(rank, index) in ranks">{{rank_str(index)}}:{{rank}}</li>
+              <li class="list-group-item small" v-for="(rank, index) in ranks" v-bind:class="{recent:recentResult(index)}">{{rank_str(index)}}:{{rank}}</li>
             </ul>
           </div>
           <div class="row space" id="action_space">

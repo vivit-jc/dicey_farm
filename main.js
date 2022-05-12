@@ -88,7 +88,13 @@ const app = {
         return "(注意：食料が足りません！)"
       }
       return ""
-    }
+    },
+    calcRank(){
+      let score = this.res_find("勝利点").num-1
+      if(score < 0){return 0}
+      else if(Math.floor(score/10) >= 10){return 11}
+      return Math.floor(score/10)+1
+    },
   },
 
   watch: {
@@ -794,14 +800,13 @@ const app = {
       let rankdata = []
       if(!localStorage.getItem("dicey_farm_score")){rankdata = [0,0,0,0,0,0,0,0,0,0,0,0]}
       else{rankdata = localStorage.getItem("dicey_farm_score").split(',').map(Number);}
-      let score = this.res_find("勝利点").num-1
-      if(score < 0){score = 0}
-      else if(Math.floor(score/10) >= 10){score = 11}
-      else{score = Math.floor(score/10)+1}
-      rankdata[score] += 1
+      rankdata[this.calcRank] += 1
       localStorage.setItem('dicey_farm_score', rankdata)
       this.ranks = rankdata
-      console.log(this.ranks)
+    },
+
+    recentResult(index){
+      return (index === this.calcRank)
     },
 
     selectItem: function(item){
@@ -956,7 +961,6 @@ const app = {
         this.workers.push(this.workers_deck.pop())
       }
     }
-
   }
 }
 
