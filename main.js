@@ -543,7 +543,7 @@ const app = {
         let r = this.res_find("牛乳")
         if(r.num === 0){return false}
         r.num -= 1
-        this.memoVP("チーズ職人",4)
+        this.memoVP("チーズ職人",5)
       } else if(name === "仕立て屋"){
         let r = this.res_find("羊毛")
         if(r.num < 3){return false}
@@ -555,7 +555,7 @@ const app = {
         a.num -= 1
         b.num -= 1
         c.num -= 1
-        this.memoVP("菓子職人",7)
+        this.memoVP("菓子職人",9)
       } else if(name === "料理人"){
         let a = this.res_find("魚"),b = this.res_find("肉"),c = this.res_find("野菜")
         if(a.num === 0 || b.num === 0 || c.num === 0){return false}
@@ -935,9 +935,9 @@ const app = {
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",cost:1},
         {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",cost:1},
         {name:"パン職人",des:"麦を2食料か1VPに変える",cost:1},
-        {name:"菓子職人",des:"麦、卵、牛乳を7VPに変える",cost:1,change:true},
+        {name:"菓子職人",des:"麦、卵、牛乳を9VPに変える",cost:1,change:true},
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",cost:1,change:true},
-        {name:"チーズ職人",des:"牛乳を4VPに変える",cost:1,change:true},
+        {name:"チーズ職人",des:"牛乳を5VPに変える",cost:1,change:true},
         {name:"精肉屋",des:"家畜を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:1},
         {name:"ハム職人",des:"豚を7VPに変える",cost:1,change:true},
         {name:"仕立て屋",des:"3羊毛を6VPに変える",cost:1,change:true},
