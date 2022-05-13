@@ -29,6 +29,7 @@ const app = {
       fields: [],
       resCooking: "",
       fast_seeding_kind: "",
+      buffer:[],
       aot:[2,2,3,3,3,4,4,4],
       resources: [],
       commands: [
@@ -95,7 +96,7 @@ const app = {
   },
 
   created() {
-    console.log("Dicey Farm ver 0.5")
+    console.log("Dicey Farm ver 0.6")
     this.initGame()
   },
 
@@ -259,28 +260,24 @@ const app = {
         this.shuffle(this.items2)
         this.merchants.push(this.items2)
         this.merchants_str.push("行商人")
-        console.log(this.merchants,this.merchants_str)
         
       } else if(worker.name === "家畜商人"){
         this.items_animal = [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"豚",num:2}]
         this.shuffle(this.items_animal)
         this.merchants.push(this.items_animal)
         this.merchants_str.push("家畜商人")
-        console.log(this.merchants,this.merchants_str)
 
       } else if(worker.name === "園芸商人"){
         this.items_seeds = [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"麦の種",num:3},{name:"野菜の種",num:3},{name:"花の種",num:3}]
         this.shuffle(this.items_seeds)
         this.merchants.push(this.items_seeds)
         this.merchants_str.push("園芸商人")
-        console.log(this.merchants,this.merchants_str)
 
       } else if(worker.name === "食材商人"){
         this.items_foods = [{name:"牛乳",num:2},{name:"卵",num:2},{name:"魚",num:2},{name:"麦",num:2},{name:"肉",num:1},{name:"野菜",num:2}]
         this.shuffle(this.items_foods)
         this.merchants.push(this.items_foods)
         this.merchants_str.push("食材商人")
-        console.log(this.merchants,this.merchants_str)
       }
     },
 
@@ -358,6 +355,8 @@ const app = {
       this.rotResource()
       this.growPlantsAndAnimals()
       if(this.worker_find("世話人")){this.res_find("食料").num+=2}
+      this.makeBuffer()
+
     },
 
     endCommand(command){
@@ -395,7 +394,6 @@ const app = {
       if(this.worker_find("堆肥小屋")){
         if(animal_num >= 4){compost = 2}
         else if(animal_num >= 1){compost = 1}
-        console.log("compost "+compost)
       }
       this.fields.forEach(e => {
         if(e.kind === "麦の種"){
@@ -920,6 +918,37 @@ const app = {
       });
     },
 
+    makeBuffer(){
+      this.buffer.resources = JSON.parse(JSON.stringify(this.resources));
+      this.buffer.merchants = this.merchants.slice()
+      this.buffer.merchants_str = this.merchants_str.slice()
+      this.buffer.workers = this.workers.slice()
+      this.buffer.workers_deck = this.workers_deck.slice()
+      this.buffer.contracted = this.contracted.slice()
+      this.buffer.facilities = this.facilities.slice()
+      this.buffer.vps = JSON.parse(JSON.stringify(this.vps));
+      this.buffer.fields = JSON.parse(JSON.stringify(this.fields));
+      this.buffer.sightDice = this.sightDice.slice()
+      this.buffer.dice = this.dice.slice()
+    },
+
+    loadBuffer(){
+      this.resources = JSON.parse(JSON.stringify(this.buffer.resources));
+      this.merchants = this.buffer.merchants.slice()
+      this.merchants_str = this.buffer.merchants_str.slice()
+      this.workers = this.buffer.workers.slice()
+      this.workers_deck = this.buffer.workers_deck.slice()
+      this.contracted = this.buffer.contracted.slice()
+      this.facilities = this.buffer.facilities.slice()
+      this.vps = JSON.parse(JSON.stringify(this.buffer.vps));
+      this.fields = JSON.parse(JSON.stringify(this.buffer.fields));
+      this.sightDice = this.buffer.sightDice.slice()
+      this.dice = this.buffer.dice.slice()
+
+      this.field_die = ""
+      this.usedCommands = []
+    },
+
     initGame(){
       this.workers = []
       this.turn = 1
@@ -930,6 +959,7 @@ const app = {
       this.contracted = []
       this.fields = [{kind:"空き"}]
       this.field_die = ""
+      this.sightDice = []
       this.usedCommands = []
       this.items2 = []
       this.items_animal = []
@@ -1036,6 +1066,8 @@ const app = {
       for(let i=0;i<6;i++){
         this.workers.push(this.workers_deck.pop())
       }
+
+      this.makeBuffer()
     }
   }
 }

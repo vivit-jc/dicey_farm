@@ -52,7 +52,10 @@
               </li>
             </ul>
             <div>
-              <button v-show="dice_is_zero && status===''" @click="endTurn()">次のラウンドへ{{alertFood}}</button>
+              <div v-show="dice_is_zero && status===''">
+                <button @click="endTurn()">次のラウンドへ{{alertFood}}</button>
+                <button @click="loadBuffer">ラウンドの最初からやり直す</button>
+              </div>
               <button v-show="status==='' || status==='cooking'" @click="startCooking()">{{cooking_button_str()}}</button>
             </div>
           </div>
