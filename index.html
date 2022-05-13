@@ -58,7 +58,10 @@
           </div>
           <div class="row space" id="dice_space" v-show="endGame">
             最終得点：{{res_find("勝利点").num}}
-            <div><button @click="initGame()" class="rounded-pill btn-sm">もう一度遊ぶ</button></div>
+            <div>
+              <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>
+              <button @click="tweet_open" class="rounded-pill btn-sm">Tweet</button>
+            </div>
             <ul class="list-group list-group-horizontal">
               <li class="list-group-item small" v-for="(rank, index) in ranks" v-bind:class="{recent:recentResult(index)}">{{rank_str(index)}}:{{rank}}</li>
             </ul>
@@ -68,7 +71,7 @@
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
-                <button type="button" @click="endCommand()" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
+                <button type="button" @click="endCommand(command)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
               </li>
             </ul>
             <ul class="list-group list-group-horizontal" >

@@ -17,6 +17,7 @@ const app = {
       viewStatus: "game",
       showAlert:false,
       alert_str:"",
+      tweet_str:"",
       turn:1,
       ranks:[],
       status:"",
@@ -326,6 +327,9 @@ const app = {
         this.memoVP("物乞い",(this.res_find("物乞い").num*3)*(-1))
 
         this.saveScore()
+        this.tweet_str = "https://twitter.com/intent/tweet?hashtags=dicey_farm&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Eshare%7Ctwgr%5E&text="+
+        "score: "+this.res_find("勝利点").num+
+        "&url=http%3A%2F%2Fintotheprow.sakura.ne.jp%2Fdicey_farm%2F"
         return true;
       }
 
@@ -850,8 +854,14 @@ const app = {
     },
 
     showRules: function(){
-      var URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/rule.md';
-      var Name = 'dicey_farm_rule';
+      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/rule.md';
+      let Name = 'dicey_farm_rule';
+      window.open(URL,Name);
+    },
+
+    tweet_open(){
+      let URL = this.tweet_str
+      let Name = 'dicey_farm_tweet';
       window.open(URL,Name);
     },
 
