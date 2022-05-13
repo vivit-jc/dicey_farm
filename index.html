@@ -72,6 +72,7 @@
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
+                <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
                 <button type="button" @click="endCommand(command)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
               </li>
             </ul>

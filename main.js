@@ -1,14 +1,3 @@
-
-// ツールチップのセット
-(function() {
-  window.addEventListener("load", function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  });
-})();
-
 const app = {
   el: '#app',
 
@@ -28,6 +17,7 @@ const app = {
       selectedItem:"",
       holdingDie:"",
       field_die:"",
+      sightDice:[],
       endGame:false,
       merchants:[],
       merchants_str:["商人"],
@@ -47,10 +37,10 @@ const app = {
         {name:"種を蒔く",des:"畑に種を蒔く 残りを返却"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
-        {name:"募集",des:"職人を4人引いてN人捨てる"},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
-        {name:"日雇い労働",des:"食料3を得る"}
+        {name:"観光化",des:"ダイス1つ2VP 全部置くと20VP 同じ目は置けない 何回でも可"},
+        {name:"日雇い労働",des:"食料3を得る"},
       ],
       items: [],
       items2:[],
@@ -202,6 +192,17 @@ const app = {
           return false
         }
         this.status = "facility"
+
+      } else if(n === "観光化"){
+        if(this.sightDice.find(e => e === this.holdingDie.num)){
+          this.addAlert("そのダイスは既に使われています")
+          return false
+        }
+        this.sightDice.push(this.holdingDie.num)
+        this.memoVP("観光化",2)
+        if(this.sightDice.length === 6){this.memoVP("観光化",8)}
+        this.sightDice.sort()
+        repeatable = true
 
       } else if(n === "日雇い労働"){
         this.res_find("食料").num += 3
@@ -447,6 +448,14 @@ const app = {
       } else if(this.status === "butter" && command.name === "バター工房"){
         return true;
       }
+    },
+
+    showSight(command){
+      return command.name === "観光化"
+    },
+
+    showDice(){
+      return this.sightDice.join()
     },
 
     workerButtons: function(name){
@@ -902,6 +911,15 @@ const app = {
       }
     },
 
+    setTooltip(){
+      window.addEventListener("load", function() {
+        let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+    },
+
     initGame(){
       this.workers = []
       this.turn = 1
@@ -990,6 +1008,7 @@ const app = {
       ]
       this.vps = [
         {name:"市場",num:0},
+        {name:"観光化",num:0},
         {name:"ウィスキー",num:0},
         {name:"宝石",num:0},
         {name:"パン職人",num:0},
