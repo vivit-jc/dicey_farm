@@ -43,7 +43,7 @@ const app = {
       commands: [
         {name:"釣り",des:"魚を(N-2)個得る（最低1）"},
         {name:"畑を耕す",des:"畑を1つ増やす 同じ目なら2回可能"},
-        {name:"種を蒔く",des:"N箇所の畑に種を蒔く"},
+        {name:"種を蒔く",des:"畑に種を蒔く 残りを返却"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
         {name:"募集",des:"職人を4人引いてN人捨てる"},
@@ -238,6 +238,7 @@ const app = {
       }
       this.decRest()
       if(!this.empty_field){
+        this.dice.push({num:this.rest}) //返却
         this.status = ""
         this.rest = 0
       }
@@ -354,8 +355,12 @@ const app = {
       if(this.worker_find("世話人")){this.res_find("食料").num+=2}
     },
 
-    endCommand: function(){
+    endCommand(command){
       this.status = ""
+      if(this.rest === 0){return true}
+      if(command.name === "種を蒔く" || command.name === "パン焼き釜" || command.name === "バター工房"){
+        this.dice.push({num:this.rest})
+      }
     },
 
     rotResource: function(){
@@ -961,8 +966,8 @@ const app = {
         {name:"羊",num:1},
       ]
       this.facilities = [
-        {name:"パン焼き釜",des:"麦を2食料に変える(N回まで)",cost:0,action:true},
-        {name:"バター工房",des:"牛乳をバターに変える(N回まで)",cost:0,action:true},
+        {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
+        {name:"バター工房",des:"牛乳をバターに変える 残りを返却",cost:0,action:true},
         {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
         {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0},
         {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0},
