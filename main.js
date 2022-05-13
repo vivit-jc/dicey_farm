@@ -841,6 +841,12 @@ const app = {
       this.ranks = rankdata
     },
 
+    resetStats(){
+      let rankdata = [0,0,0,0,0,0,0,0,0,0,0,0]
+      localStorage.setItem('dicey_farm_score', rankdata)
+      this.ranks = rankdata
+    },
+
     recentResult(index){
       return (index === this.calcRank)
     },

@@ -59,8 +59,9 @@
           <div class="row space" id="dice_space" v-show="endGame">
             最終得点：{{res_find("勝利点").num}}
             <div>
-              <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>
               <button @click="tweet_open" class="rounded-pill btn-sm">Tweet</button>
+              <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>
+              <button @click="resetStats" class="rounded-pill btn-sm">スコア統計リセット</button>
             </div>
             <ul class="list-group list-group-horizontal">
               <li class="list-group-item small" v-for="(rank, index) in ranks" v-bind:class="{recent:recentResult(index)}">{{rank_str(index)}}:{{rank}}</li>
