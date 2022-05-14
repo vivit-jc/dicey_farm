@@ -241,7 +241,7 @@ const app = {
       }
       this.decRest()
       if(!this.empty_field){
-        this.dice.push({num:this.rest}) //返却
+        if(this.rest > 0){this.dice.push({num:this.rest})} //返却
         this.status = ""
         this.rest = 0
       }
