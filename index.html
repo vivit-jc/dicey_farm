@@ -39,7 +39,7 @@
           </ul>
           <ul class="list-group">
             <li class="list-group-item" v-for="res in resources" v-show='resShow(res)'>
-              <span v-bind:class="{red:not_enough_food(res)}">{{res.rot}}{{ res.name }}:{{ res.num }}<span v-if='res.name==="食料"'>/{{food_cost}} </span></span>
+              <span v-bind:class="{red:not_enough_food(res)}">{{res.rot}}{{ res.name }}:{{ res.num }}<span v-if='res.name==="食料"'> (-{{food_cost}}) </span></span>
                 <button type="button" @click="clickResCook(res)" v-show="food_changeable(res)" class="rounded-pill btn-sm">{{food_change_str(res)}}</button>
                 <button type="button" @click="clickResCommand(res)" v-show="show_if_res_command(res)" class="rounded-pill btn-sm">{{res_command_str(res)}}</button>
             </li>
@@ -47,12 +47,15 @@
         </div>
         <div class="col">
           <div class="row space" id="dice_space" v-show="!endGame">
-            {{turn}}ラウンド目  {{turn_seq}}
-            <ul class="list-group list-group-horizontal">
-              <li class="list-group-item" v-for="die in dice" v-bind:class="[{hover:activeItem===die},{hold:holdingDie===die}]" @mouseover="activeItem=die" @mouseout="activeItem=''"  v-on:click="click_die(die)">
-                <img :src=dice_img(die.num) class="die">
-              </li>
-            </ul>
+            <div class="row">
+                {{turn}} / 8ラウンド目
+                <small>各ラウンドで使用できるダイス数： {{turn_seq}}</small>
+                <ul class="list-group list-group-horizontal">
+                  <li class="list-group-item" v-for="die in dice" v-bind:class="[{hover:activeItem===die},{hold:holdingDie===die}]" @mouseover="activeItem=die" @mouseout="activeItem=''"  v-on:click="click_die(die)">
+                    <img :src=dice_img(die.num) class="die">
+                  </li>
+                </ul>
+            </div>
             <div>
               <div v-show="dice_is_zero && status===''">
                 <button @click="endTurn()">{{nextRound}}{{alertFood}}</button>
