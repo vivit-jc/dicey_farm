@@ -101,7 +101,7 @@ const app = {
 
   created() {
     console.log("Dicey Farm ver 0.6")
-    this.initGame()
+    this.initGame()    
   },
 
   methods: {
@@ -814,8 +814,12 @@ const app = {
     },
 
     countWorkerVP: function(){
-      if(this.worker_find("畜産学者") && this.res_find("鶏").num > 0 && this.res_find("羊").num > 0 && this.res_find("豚").num > 0 && this.res_find("牛").num > 0){
-        this.memoVP("畜産学者",12)
+      if(this.worker_find("畜産学者")){
+        let c = 0
+        while(this.res_find("鶏").num > c && this.res_find("羊").num > c && this.res_find("豚").num > c && this.res_find("牛").num > c){
+          this.memoVP("畜産学者",15)
+          c += 1
+        }
       }
       if(this.worker_find("測量士") && this.fields.length >= 8){
         this.memoVP("測量士",30)
@@ -1020,7 +1024,7 @@ const app = {
         {name:"長老",des:"ダイス1つの目を+1か-1する",cost:1,dice:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",cost:1,dice:true},
         {name:"夜警",des:"ダイス1つの目を2か5にする",cost:1,dice:true},
-        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛をすべて所有していれば12VP",cost:1},
+        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛のセットが1つにつき15VP",cost:1},
         {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",cost:1},
         {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",cost:1},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",cost:1},
