@@ -11,6 +11,8 @@
     <h1 class="center">Dicey Farm</h1>
     <div class="right">
       制作：vivit_jc
+      <a href="https://twitter.com/vivit_jc">Twitter</a>&nbsp;
+      <a href="https://github.com/vivit-jc/dicey_farm">GitHub</a>
     </div>
     <transition>
       <div class="alert alert-danger fade show center" id="alertmsg" role="alert" v-show="showAlert">{{alert_str}}</div>
@@ -53,7 +55,7 @@
             </ul>
             <div>
               <div v-show="dice_is_zero && status===''">
-                <button @click="endTurn()">次のラウンドへ{{alertFood}}</button>
+                <button @click="endTurn()">{{nextRound}}{{alertFood}}</button>
                 <button @click="loadBuffer">ラウンドの最初からやり直す</button>
               </div>
               <button v-show="status==='' || status==='cooking'" @click="startCooking()">{{cooking_button_str()}}</button>

@@ -40,7 +40,7 @@ const app = {
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
-        {name:"観光化",des:"ダイス1つ2VP 全部置くと20VP 同じ目は置けない 何回でも可"},
+        {name:"観光化",des:"ダイス1つ2VP 全部置くと+8VP 同じ目は置けない 何回でも可"},
         {name:"日雇い労働",des:"食料3を得る"},
       ],
       items: [],
@@ -88,6 +88,10 @@ const app = {
       if(score < 0){return 0}
       else if(Math.floor(score/10) >= 10){return 11}
       return Math.floor(score/10)+1
+    },
+    nextRound(){
+      if(this.turn === 8){return "ゲーム終了"}
+      else{return "次のラウンドへ"}
     },
   },
 
@@ -326,7 +330,7 @@ const app = {
 
         this.saveScore()
         this.tweet_str = "https://twitter.com/intent/tweet?hashtags=dicey_farm&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Eshare%7Ctwgr%5E&text="+
-        "score: "+this.res_find("勝利点").num+
+        "score: "+this.res_find("勝利点").num+" "+this.mvp_str()+
         "&url=http%3A%2F%2Fintotheprow.sakura.ne.jp%2Fdicey_farm%2F"
         return true;
       }
@@ -1068,6 +1072,50 @@ const app = {
       }
 
       this.makeBuffer()
+    },
+
+    mvp_str(){
+      let vp_sorted = this.vps.sort(function (a, b) {
+        return b.num - a.num;
+      });
+      
+      if(this.res_find("勝利点").num <= 30){
+        return "俺たちの牧場はこれからだ！"
+      } else if(vp_sorted[0].num >= 20){
+        if(vp_sorted[0].name === "市場"){
+          return "多くの仲買人にとって、あなたの牧場の品物ほど信頼の置ける存在はない"
+        } else if(vp_sorted[0].name === "観光化"){
+          return "あなたの牧場に来る観光客のおかげで、牧場だけでなく町全体の経済も潤っている"
+        } else if(vp_sorted[0].name === "ウィスキー"){
+          return "あなたの牧場で作られたウィスキーが、この地方の新たな名物として全国的に認知されている"
+        } else if(vp_sorted[0].name === "宝石"){
+          return "牧場主としてだけでなく、宝石コレクターとしてもあなたの名は知れ渡っている"
+        } else if(vp_sorted[0].name === "パン職人"){
+          return "町の人々は、あなたの牧場の麦で出来たパンを食べないと一日が始まらないと口を揃える"
+        } else if(vp_sorted[0].name === "菓子職人"){
+          return "こだわりの素材で作られたお菓子が、町の人々に毎日のささやかな幸せを運んでいる"
+        } else if(vp_sorted[0].name === "チーズ職人"){
+          return "あなたの牧場で作られたチーズが、全国の料理人の注目を集めている"
+        } else if(vp_sorted[0].name === "ハム職人"){
+          return "あなたの牧場で作られたハムが、贈呈品の新しい定番になりつつある"
+        } else if(vp_sorted[0].name === "仕立て屋"){
+          return "町の人々は、普段着ている服がすべてあなたの牧場の羊の毛から出来ていることに気付いていない"
+        } else if(vp_sorted[0].name === "ソーセージ職人"){
+          return "あなたの牧場で作られたソーセージは、どんな食べ方をしても美味いと評判になっている"
+        } else if(vp_sorted[0].name === "花屋"){
+          return "あなたの牧場の花は、町の人々の何気ない日々の暮らしを美しく彩っている"
+        } else if(vp_sorted[0].name === "料理人"){
+          return "最高の食材と最高の技で作られた料理を求めて、連日遠くからたくさんの人がこの町にやってくる"
+        } else if(vp_sorted[0].name === "測量士"){
+          return "あなたの牧場が常に拡大し続けるせいで、町は専属の測量士を雇うことになった"
+        } else if(vp_sorted[0].name === "畜産学者"){
+          return "家畜と経営の相互作用について、畜産学会はあなたの牧場を興味深い事例として注目している"
+        } else if(vp_sorted[0].name === "会計士"){
+          return "国内でも有数の巨額納税者として、あなたの牧場には色んな意味で熱い視線が送られている"
+        }
+      } else{
+        return "他分野に渡って手広く展開するあなたの経営手腕は、他の牧場主からも一目置かれている"
+      }
     }
   }
 }
