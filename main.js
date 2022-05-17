@@ -83,6 +83,18 @@ const app = {
       }
       return ""
     },
+    enough_food_for_cook(){
+      if(this.count_kind_of_food >= 2){return true}
+      return false
+    },
+    count_kind_of_food(){
+      let foods = ["魚","麦","野菜","卵","肉","バター","牛乳"]
+      let c = 0
+      foods.forEach(e=>{
+        if(this.res_find(e).num>0){ c+=1 }
+      })
+      return c;
+    },
     calcRank(){
       let score = this.res_find("勝利点").num-1
       if(score < 0){return 0}
@@ -630,6 +642,7 @@ const app = {
     },
 
     startCooking: function(){
+      if(!this.enough_food_for_cook){return false}
       if(this.status === "cooking"){
         this.status = ""
         this.resCooking = ""
@@ -648,6 +661,9 @@ const app = {
           res.num -= 1
           this.res_find("食料").num += 3
           this.resCooking = ""
+        }
+        if(!this.enough_food_for_cook){
+          this.status = ""
         }
       } else {
         res.num -= 1

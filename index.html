@@ -60,7 +60,7 @@
               <div v-show="dice_is_zero && status===''">
                 <button @click="endTurn()">{{nextRound}}{{alertFood}}</button>
               </div>
-              <button v-show="status==='' || status==='cooking'" @click="startCooking()">{{cooking_button_str()}}</button>
+              <button v-show="status==='' || status==='cooking'" v-bind:class="{'btn-secondary':!enough_food_for_cook}" @click="startCooking()">{{cooking_button_str()}}</button>
               <button v-show="status===''" @click="loadBuffer">ラウンドの最初からやり直す</button>
             </div>
           </div>
