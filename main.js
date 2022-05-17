@@ -992,7 +992,7 @@ const app = {
       this.resources = [
         {name:"勝利点",num:0},
         {name:"物乞い",num:0},
-        {name:"食料",num:3},
+        {name:"食料",num:3,rot:"▲"},
         {name:"魚",num:0,rot:"▲"},
         {name:"麦",num:0},
         {name:"野菜",num:0,rot:"▲"},
