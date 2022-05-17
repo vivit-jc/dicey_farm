@@ -75,6 +75,10 @@ h1: {
   height: 40px;
 }
 
+.market {
+  background-color: #cee4ae !important;
+}
+
 .hover {
   background-color: #cccccc !important;
 }
@@ -85,6 +89,10 @@ h1: {
 
 .hold {
   background-color: #0000ff !important;
+}
+
+.passive {
+  background-color: #cccccc !important;
 }
 
 .red {
