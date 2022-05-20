@@ -1048,7 +1048,7 @@ const app = {
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",passive:true},
         {name:"羊飼い",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",passive:true},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",passive:true},
-        {name:"種まき人",des:"商人から種を購入するたびに、そのうち１つを蒔いてよい",passive:true},
+        {name:"種まき人",des:"商人から種を購入するたびに、そのうち1つを蒔いてよい",passive:true},
         {name:"パン職人",des:"麦を2食料か1VPに変える",market:true},
         {name:"菓子職人",des:"麦、卵、牛乳を9VPに変える",change:true,market:true},
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",change:true,market:true},
