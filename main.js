@@ -376,10 +376,10 @@ const app = {
 
     },
 
-    endCommand(command){
+    endCommand(name){
       this.status = ""
       if(this.rest === 0){return true}
-      if(command.name === "種を蒔く" || command.name === "パン焼き釜" || command.name === "バター工房" || command.name === "解体小屋"){
+      if(name === "種を蒔く" || name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
         this.dice.push({num:this.rest})
       }
     },
@@ -689,7 +689,7 @@ const app = {
         res.num -= 1
         this.res_find("肉").num += this.meatAmount(res)
         this.decRest()
-        this.endCommand()
+        this.endCommand("解体小屋")
         this.checkFieldsFilled()
       }
     },

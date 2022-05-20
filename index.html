@@ -81,7 +81,7 @@
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
-                <button type="button" @click="endCommand(command)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
+                <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
               </li>
             </ul>
             <ul class="list-group list-group-horizontal" >
