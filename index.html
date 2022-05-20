@@ -77,7 +77,7 @@
           </div>
           <div class="row space" id="action_space">
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command.name)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
+              <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
@@ -85,7 +85,7 @@
               </li>
             </ul>
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{passive:command.passive},command_style(command.name)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
+              <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{passive:command.passive},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
@@ -94,7 +94,7 @@
               </li>
             </ul>
           </div>
-          <div class="row space" v-for="(items, index) in merchants" v-bind:class="command_style(merchants_str[index])">
+          <div class="row space" v-for="(items, index) in merchants" v-bind:class="command_style(worker_find(merchants_str[index]))">
             {{merchants_str[index]}}
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item" v-for="(item, index2) in items" :key="item" v-show="index2<6">
@@ -125,7 +125,7 @@
           <div class="row space" id="worker_space">
             契約できる職人
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item worker" v-for="worker in workers" v-bind:class="[{market:worker.market},command_style(worker.name)]">
+              <li class="list-group-item worker" v-for="worker in workers" v-bind:class="[{market:worker.market},command_style(worker)]">
                 {{worker.name}}<br><span class="des">{{worker.des}}</span><br>
                 <button type="button" @click="contractWorker(worker)" v-show="status==='contract'" class="rounded-pill btn-sm">契約</button>
                 <button type="button" @click="trashWorker(worker)" v-show="status==='trash_worker'" class="rounded-pill btn-sm">捨てる</button>

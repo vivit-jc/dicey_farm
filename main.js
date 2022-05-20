@@ -69,12 +69,6 @@ const app = {
       return str
     },
     food_cost: function(){
-      // 契約した職人の維持コストを実装するか迷う
-//      let wc = 0
-//      this.contracted.forEach(e => {
-//        wc += e.cost
-//      })
-//      return this.aot[this.turn-1] + wc
       return this.aot[this.turn-1]+1
     },
     alertFood(){
@@ -112,7 +106,7 @@ const app = {
   },
 
   created() {
-    console.log("Dicey Farm ver 0.6")
+    console.log("Dicey Farm ver 0.7")
     this.initGame()    
   },
 
@@ -608,6 +602,9 @@ const app = {
     },
 
     worker_find: function(name){
+      if(name === "商人"){
+        return {name:"商人"} //アクションだが商品スロットの処理の関係で職人として返さないといけないことがある
+      }
       return this.contracted.find(e => e.name === name);
     },
 
@@ -770,7 +767,8 @@ const app = {
       }
     },
 
-    command_style(name){
+    command_style(command){
+      let name = command.name
       if(name === "商人"){
         return {vendor:true}
       } else if(name === "出荷"){
@@ -783,6 +781,8 @@ const app = {
         return {seed_vendor:true}
       } else if(name === "食材商人"){
         return {food_vendor:true}
+      } else if(command.market){
+        return {market:true}
       }
       return false
     },
