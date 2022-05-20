@@ -378,6 +378,9 @@ const app = {
 
     endCommand(name){
       this.status = ""
+      if(name === "種まき人"){
+        this.fast_seeding_kind = ""
+      }
       if(this.rest === 0){return true}
       if(name === "種を蒔く" || name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
         this.dice.push({num:this.rest})
