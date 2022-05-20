@@ -238,6 +238,7 @@ const app = {
           return false
         }
         this.status = "butchering"
+        this.rest = this.holdingDie.num
 
       } else {
         return false
@@ -378,7 +379,7 @@ const app = {
     endCommand(command){
       this.status = ""
       if(this.rest === 0){return true}
-      if(command.name === "種を蒔く" || command.name === "パン焼き釜" || command.name === "バター工房"){
+      if(command.name === "種を蒔く" || command.name === "パン焼き釜" || command.name === "バター工房" || command.name === "解体小屋"){
         this.dice.push({num:this.rest})
       }
     },
@@ -687,7 +688,8 @@ const app = {
       } else if(this.status === "butchering"){
         res.num -= 1
         this.res_find("肉").num += this.meatAmount(res)
-        this.status = ""
+        this.decRest()
+        this.endCommand()
         this.checkFieldsFilled()
       }
     },
@@ -1073,7 +1075,7 @@ const app = {
       this.facilities = [
         {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
         {name:"バター工房",des:"牛乳をバターに変える 残りを返却",cost:0,action:true},
-        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8",cost:0,action:true},
+        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8 (N-1)を返却",cost:0,action:true},
         {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0,passive:true},
         {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0,passive:true},
       ]
