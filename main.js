@@ -37,8 +37,8 @@ const app = {
         {name:"畑を耕す",des:"畑を1つ増やす 同じ目なら2回可能"},
         {name:"種を蒔く",des:"畑に種を蒔く 残りを返却"},
         {name:"商人",des:"リストの品物を買う 何回でも可"},
-        {name:"契約",des:"食料Nを払って職人1人と契約する"},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可",market:true},
+        {name:"契約",des:"食料Nを払って職人1人と契約する"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
         {name:"観光化",des:"ダイス1つ2VP 全部置くと+8VP 同じ目は置けない 何回でも可"},
         {name:"日雇い労働",des:"食料3を得る"},
@@ -763,6 +763,23 @@ const app = {
         this.res_find("肉").num += this.meatAmount(r)
         this.checkFieldsFilled()
       }
+    },
+
+    command_style(name){
+      if(name === "商人"){
+        return {vendor:true}
+      } else if(name === "出荷"){
+        return {market:true}
+      } else if(name === "行商人"){
+        return {merchant:true}
+      } else if(name === "家畜商人"){
+        return {animal_vendor:true}
+      } else if(name === "園芸商人"){
+        return {seed_vendor:true}
+      } else if(name === "食材商人"){
+        return {food_vendor:true}
+      }
+      return false
     },
 
     food_change_str: function(res){

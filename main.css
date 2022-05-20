@@ -76,7 +76,27 @@ h1: {
 }
 
 .market {
-  background-color: #cee4ae !important;
+  background-color: #f8e58c !important;
+}
+
+.vendor{
+  background-color: #c1e4e9 !important;
+}
+
+.merchant{
+  background-color: #bbbcde !important;
+}
+
+.animal_vendor{
+  background-color: #f6b894 !important;
+}
+
+.seed_vendor{
+  background-color: #badcad !important;
+}
+
+.food_vendor{
+  background-color: #b28c6e !important;
 }
 
 .hover {
@@ -111,9 +131,10 @@ h1: {
   width: 120px;
 }
 
-.merchant_dice {
+.vendor_dice {
   height: 30px;
 }
+
 
 .center {
   text-align: center;

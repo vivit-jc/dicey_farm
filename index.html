@@ -27,7 +27,7 @@
     </div>
     <div class="container"  v-show="viewStatus==='game'">
       <div class="row">
-        <div class="col-2 space" id="resources_space">
+        <div class="col-12 col-lg-2 space" id="resources_space">
           <div>
             <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
             <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
@@ -38,7 +38,7 @@
             </li>
           </ul>
           <ul class="list-group">
-            <li class="list-group-item" v-for="res in resources" v-show='resShow(res)'>
+            <li class="list-group-item " v-for="res in resources" v-show='resShow(res)'>
               <span v-bind:class="{red:not_enough_food(res)}">{{res.rot}}{{ res.name }}:{{ res.num }}<span v-if='res.name==="食料"'> (-{{food_cost}}) </span></span>
                 <button type="button" @click="clickResCook(res)" v-show="food_changeable(res)" class="rounded-pill btn-sm">{{food_change_str(res)}}</button>
                 <button type="button" @click="clickResCommand(res)" v-show="show_if_res_command(res)" class="rounded-pill btn-sm">{{res_command_str(res)}}</button>
@@ -77,7 +77,7 @@
           </div>
           <div class="row space" id="action_space">
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{market:command.market}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
+              <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command.name)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
@@ -85,7 +85,7 @@
               </li>
             </ul>
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{passive:command.passive},{market:command.market}]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
+              <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{passive:command.passive},command_style(command.name)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <button type="button" @click="endCommand(command)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
@@ -94,11 +94,11 @@
               </li>
             </ul>
           </div>
-          <div class="row space merchant" v-for="(items, index) in merchants">
+          <div class="row space" v-for="(items, index) in merchants" v-bind:class="command_style(merchants_str[index])">
             {{merchants_str[index]}}
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item" v-for="(item, index2) in items" :key="item" v-show="index2<6">
-                <img class="merchant_dice" :src="dice_img(index2+1)">
+                <img class="vendor_dice" :src="dice_img(index2+1)">
                 {{item.name}}x{{item.num}}
               </li>
             </ul>
@@ -125,7 +125,7 @@
           <div class="row space" id="worker_space">
             契約できる職人
             <ul class="list-group list-group-horizontal" >
-              <li class="list-group-item worker" v-for="worker in workers" v-bind:class="{market:worker.market}">
+              <li class="list-group-item worker" v-for="worker in workers" v-bind:class="[{market:worker.market},command_style(worker.name)]">
                 {{worker.name}}<br><span class="des">{{worker.des}}</span><br>
                 <button type="button" @click="contractWorker(worker)" v-show="status==='contract'" class="rounded-pill btn-sm">契約</button>
                 <button type="button" @click="trashWorker(worker)" v-show="status==='trash_worker'" class="rounded-pill btn-sm">捨てる</button>
