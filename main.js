@@ -28,7 +28,6 @@ const app = {
       contracted:[],
       fields: [],
       resCooking: "",
-      fast_seeding_kind: "",
       buffer:[],
       aot:[2,2,3,3,3,4,4,4],
       resources: [],
@@ -106,7 +105,7 @@ const app = {
   },
 
   created() {
-    console.log("Dicey Farm ver 0.7")
+    console.log("Dicey Farm ver 1.00")
     this.initGame()    
   },
 
@@ -159,7 +158,6 @@ const app = {
         }
         this.res_find(item.name).num += item.num
         repeatable = true
-        if(this.worker_find("種まき人")) {this.fast_seeding(this.res_find(item.name))}
       
       } else if(n === "種を蒔く"){
         if(!this.empty_field){
@@ -168,6 +166,7 @@ const app = {
         }
         this.status = "seeding"
         this.rest = this.holdingDie.num
+        if(this.worker_find("種まき人")) {repeatable = true}
       
       } else if(n === "契約"){
         if(this.worker_find("斡旋業者") && this.res_find("食料").num > 0){}
@@ -245,11 +244,6 @@ const app = {
       let f = this.empty_field 
       f.kind = seed.name
       seed.num -= 1
-      if(this.fast_seeding_kind){ //種まき人の効果は1回だけ
-        this.status = ""
-        this.fast_seeding_kind = ""
-        return true;
-      }
       this.decRest()
       if(!this.empty_field){
         if(this.rest > 0){this.dice.push({num:this.rest})} //返却
@@ -305,13 +299,6 @@ const app = {
         this.res_find("肉").rot = ""
         this.res_find("魚").rot = "" 
       }
-    },
-
-    fast_seeding: function(res){
-      if(this.isSeed(res) != true){return false}
-      if(!this.fields.find(e => e.kind === "空き")){return false}
-      this.status = "fast_seeding"
-      this.fast_seeding_kind = res.name
     },
 
     deleteDie: function(){
@@ -372,9 +359,6 @@ const app = {
 
     endCommand(name){
       this.status = ""
-      if(name === "種まき人"){
-        this.fast_seeding_kind = ""
-      }
       if(this.rest === 0){return true}
       if(name === "種を蒔く" || name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
         this.dice.push({num:this.rest})
@@ -438,9 +422,7 @@ const app = {
           return true;
         } else if(this.status === "butchering" && command.name === "解体小屋"){
           return true;
-        } else if(this.status === "fast_seeding" && command.name === "種まき人"){
-          return true;
-        } 
+        }
       }else if(str === "出荷"){
         if(this.status === "market" && this.worker_find(command.name).change){
           return true;
@@ -480,7 +462,7 @@ const app = {
       } else if(name === "精肉屋"){
         return ["鶏>肉2","羊>肉4","豚>肉6","牛>肉8"]
       } else if(name === "パン職人"){
-        return [">食料2",">VP1"]
+        return ["麦1>食料2","麦2>VP3"]
       } else if(name === "ソーセージ職人"){
         return [">食料2",">VP3"]
       }
@@ -558,7 +540,7 @@ const app = {
         let r = this.res_find("豚")
         if(r.num === 0){return false}
         r.num -= 1
-        this.memoVP("ハム職人",7)
+        this.memoVP("ハム職人",9)
       } else if(name === "ウィスキー職人"){
         let r = this.res_find("麦")
         if(r.num < 2){return false}
@@ -636,9 +618,7 @@ const app = {
         return true
       } else if(this.status === "butchering" && this.isAnimal(res)){
         return true
-      } else if(this.status === "fast_seeding" && this.fast_seeding_kind === res.name) {
-        return true
-      }
+      } 
       return false
     },
 
@@ -675,7 +655,7 @@ const app = {
     clickResCommand: function(res){
       if(this.status === "market"){
         this.change_to_vp(res)
-      } else if(this.status === "seeding" || this.status === "fast_seeding"){
+      } else if(this.status === "seeding"){
         this.doSeed(res)
       } else if(this.status === "bread"){
         res.num -= 1
@@ -730,13 +710,15 @@ const app = {
       } else if(n === "パン職人"){
         let r = this.res_find("麦")
         if(r.num <= 0){return false}
-        r.num -= 1
-        this.decRest()
-        if(button === ">食料2"){
+        if(button === "麦1>食料2"){
+          r.num -= 1
           this.res_find("食料").num += 2
-        } else if(button === ">VP1"){
-          this.memoVP("パン職人",1)
+        } else if(button === "麦2>VP3"){
+          if(r.num <= 1){return false}
+          r.num -= 2
+          this.memoVP("パン職人",3)
         }
+        this.decRest()
       } else if(n === "ソーセージ職人"){
         let r = this.res_find("肉")
         if(r.num <= 0){return false}
@@ -802,7 +784,7 @@ const app = {
           return "2>1VP"
         }
         return ">"+this.market_value(res)+"VP"
-      } else if(this.status === "seeding" || this.status === "fast_seeding"){
+      } else if(this.status === "seeding"){
         return "蒔く"
       } else if(this.status === "bread" && n === "麦"){
         return ">2食料"
@@ -867,7 +849,10 @@ const app = {
         else{this.res_find("物乞い").num = 0}
       }
       if(this.worker_find("会計士")){
-        this.memoVP("会計士",Math.floor(this.res_find("勝利点").num/5))
+        this.memoVP("会計士",Math.floor(this.res_find("勝利点").num/10))
+      }
+      if(this.worker_find("ツアーガイド") && this.sightDice.length === 6){
+        this.memoVP("観光化",10)
       }
     },
 
@@ -1048,13 +1033,13 @@ const app = {
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",passive:true},
         {name:"羊飼い",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",passive:true},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",passive:true},
-        {name:"種まき人",des:"商人から種を購入するたびに、そのうち1つを蒔いてよい",passive:true},
-        {name:"パン職人",des:"麦を2食料か1VPに変える",market:true},
+        {name:"種まき人",des:"種を蒔くアクションが1ラウンドに何回でもできる",passive:true},
+        {name:"パン職人",des:"麦1つを2食料に変えるか、麦2つを3VPに変える",market:true},
         {name:"菓子職人",des:"麦、卵、牛乳を9VPに変える",change:true,market:true},
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",change:true,market:true},
         {name:"チーズ職人",des:"牛乳を5VPに変える",change:true,market:true},
         {name:"精肉屋",des:"家畜を肉に変える 鶏:2 羊:4 豚:6 牛:8",market:true},
-        {name:"ハム職人",des:"豚を7VPに変える",change:true,market:true},
+        {name:"ハム職人",des:"豚を9VPに変える",change:true,market:true},
         {name:"仕立て屋",des:"3羊毛を6VPに変える",change:true,market:true},
         {name:"花屋",des:"花を4VPに変える",change:true,market:true},
         {name:"ソーセージ職人",des:"肉を2食料か3VPに変える",market:true},
@@ -1064,7 +1049,8 @@ const app = {
         {name:"夜警",des:"ダイス1つの目を2か5にする",dice:true},
         {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛のセットが1つにつき15VP",passive:true},
         {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",passive:true},
-        {name:"会計士",des:"ゲーム終了時、5VPにつき1VP得る",passive:true},
+        {name:"会計士",des:"ゲーム終了時、10VPにつき1VP得る",passive:true},
+        {name:"ツアーガイド",des:"ゲーム終了時、観光化が完了しているなら10VP",passive:true},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",passive:true},
       ]
       this.items = [
