@@ -89,7 +89,7 @@ const app = {
       return c;
     },
     calcRank(){
-      let score = this.res_find("勝利点").num-1
+      let score = this.res_find("VP").num-1
       if(score < 0){return 0}
       else if(Math.floor(score/10) >= 10){return 11}
       return Math.floor(score/10)+1
@@ -324,7 +324,7 @@ const app = {
 
         this.saveScore()
         this.tweet_str = "https://twitter.com/intent/tweet?hashtags=dicey_farm&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Eshare%7Ctwgr%5E&text="+
-        "score: "+this.res_find("勝利点").num+" "+this.mvp_str()+
+        "score: "+this.res_find("VP").num+" "+this.mvp_str()+
         "&url=http%3A%2F%2Fintotheprow.sakura.ne.jp%2Fdicey_farm%2F"
         return true;
       }
@@ -603,7 +603,7 @@ const app = {
     },
 
     resShow: function(res){
-      return res.num > 0 || res.name==="食料" || res.name==="勝利点"
+      return res.num > 0 || res.name==="食料" || res.name==="VP"
     },
 
     show_if_res_command: function(res){
@@ -849,7 +849,7 @@ const app = {
         else{this.res_find("物乞い").num = 0}
       }
       if(this.worker_find("会計士")){
-        this.memoVP("会計士",Math.floor(this.res_find("勝利点").num/10))
+        this.memoVP("会計士",Math.floor(this.res_find("VP").num/10))
       }
       if(this.worker_find("ツアーガイド") && this.sightDice.length === 6){
         this.memoVP("観光化",10)
@@ -857,7 +857,7 @@ const app = {
     },
 
     memoVP(name,pt){
-      this.res_find("勝利点").num += pt
+      this.res_find("VP").num += pt
       this.vp_find(name).num += pt
     },
 
@@ -997,7 +997,7 @@ const app = {
       this.items_seeds = []
       this.items_foods = []
       this.resources = [
-        {name:"勝利点",num:0},
+        {name:"VP",num:0},
         {name:"物乞い",num:0},
         {name:"食料",num:3,rot:"▲"},
         {name:"魚",num:0,rot:"▲"},
@@ -1107,7 +1107,7 @@ const app = {
         return b.num - a.num;
       });
       
-      if(this.res_find("勝利点").num <= 30){
+      if(this.res_find("VP").num <= 30){
         return "俺たちの牧場はこれからだ！"
       } else if(vp_sorted[0].num >= 20){
         if(vp_sorted[0].name === "市場"){

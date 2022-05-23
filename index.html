@@ -19,11 +19,7 @@
     </transition>
     <div class="center"  v-show="viewStatus==='howtoplay'">
       <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
-      <img src="info.png">
-    </div>
-    <div class="center"  v-show="viewStatus==='rules'">
-      <button type="button" @click="returnGame" class="btn btn-secondary btn-sm">ゲームに戻る</button><br>
-      <img src="rules.png">
+      <img src="info.jpg">
     </div>
     <div class="container"  v-show="viewStatus==='game'">
       <div class="row">
@@ -65,7 +61,7 @@
             </div>
           </div>
           <div class="row space" id="dice_space" v-show="endGame">
-            最終得点：{{res_find("勝利点").num}}
+            score: {{res_find("VP").num}}
             <div>
               <button @click="tweet_open" class="rounded-pill btn-sm">Tweet</button>
               <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>
