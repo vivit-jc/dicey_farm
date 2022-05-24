@@ -314,7 +314,7 @@ const app = {
 
       this.memoVP("ウィスキー",this.res_find("ウィスキー").num)
 
-      if(this.turn === 3){
+      if(this.turn === 8){
         this.endGame = true
         this.memoVP("宝石",this.res_find("宝石").num*5)
         this.countWorkerVP()
