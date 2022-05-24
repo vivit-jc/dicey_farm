@@ -64,7 +64,7 @@
             </div>
           </div>
           <div class="row space" id="dice_space" v-show="endGame">
-            score: {{res_find("VP").num}}
+            score: {{res_find("VP").num}} <span v-show="mode==='daily'">[daily mode]</span>
             <div>
               <button @click="tweet_open" class="rounded-pill btn-sm">Tweet</button>
               <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>
