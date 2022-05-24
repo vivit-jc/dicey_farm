@@ -551,6 +551,7 @@ const app = {
         if(r.num === 0){return false}
         r.num -= 1
         this.memoVP("ハム職人",9)
+        this.checkFieldsFilled()
       } else if(name === "ウィスキー職人"){
         let r = this.res_find("麦")
         if(r.num < 2){return false}
