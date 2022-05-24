@@ -3,6 +3,7 @@ const app = {
 
   data() {
     return {
+      mode: "daily",
       viewStatus: "game",
       showAlert:false,
       alert_str:"",
@@ -48,7 +49,12 @@ const app = {
       items_seeds:[],
       items_foods:[],
       facilities: [],
-      vps:[]
+      vps:[],
+      dice_table: [],
+      worker_table: [],
+      items_table: [],
+      items_table_plus: [],
+      merchants_item_table: []
     }
   },
 
@@ -98,6 +104,16 @@ const app = {
       if(this.turn === 8){return "ゲーム終了"}
       else{return "次のラウンドへ"}
     },
+    mode_str(){
+      if(this.mode === "normal"){
+        return "Dailyでプレイ"
+      } else {
+        return "Normalでプレイ"
+      }
+    },
+    vendors_list(){
+      return [this.items,this.items2,this.items_animal,this.items_seeds,this.items_foods]
+    }
   },
 
   watch: {
@@ -105,7 +121,7 @@ const app = {
   },
 
   created() {
-    console.log("Dicey Farm ver 1.00")
+    console.log("Dicey Farm ver 1.01")
     this.initGame()    
   },
 
@@ -184,7 +200,7 @@ const app = {
           return false
         }
         for(let i=0;i<4;i++){
-          this.workers.push(this.workers_deck.pop())
+          this.workers.push(this.workers_deck.shift())
         }
         this.rest = this.holdingDie.num
         this.status = "trash_worker"
@@ -260,11 +276,17 @@ const app = {
       this.cost = 0
       if(worker.name === "行商人"){
         this.items2 = this.items.slice()
+        this.merchants_str.push("行商人")
         if(this.turn < 3){this.items2.push({name:"牛",num:1})} //行商人は1,2ターン目でも牛を出す
         this.items2.push({name:"宝石",num:1})
-        this.shuffle(this.items2)
-        this.merchants.push(this.items2)
-        this.merchants_str.push("行商人")
+
+        if(this.mode === "normal"){
+          this.shuffle(this.items2)
+          this.merchants.push(this.items2)
+        }
+        else{
+          this.shuffleVendorFromTable(1)
+        }
         
       } else if(worker.name === "家畜商人"){
         this.items_animal = [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"豚",num:2}]
@@ -334,20 +356,32 @@ const app = {
       this.usedCommands = []
       this.workers.splice(0, 2)
       
-      if(this.turn === 3){this.items.push({name:"牛",num:1})} //牛は3ターン目から出る
-      this.shuffle(this.items)
-      this.shuffle(this.items2)
-      this.shuffle(this.items_animal)
-      this.shuffle(this.items_seeds)
-      this.shuffle(this.items_foods)
+      if(this.turn === 3){
+        this.items.push({name:"牛",num:1})
+        this.items_template.push({name:"牛",num:1})
+      } //牛は3ターン目から出る
+      
+      if(this.mode === "daily"){
+        this.merchants = []
+        this.merchants_str.forEach(e=>{
+          this.shuffleVendorFromTable(this.getVendorID(e))
+        })
+      } else {
+        this.vendors_list.forEach(e => {
+          this.shuffle(e)
+        })
+      }
 
+      let n = 0
       for(let i=0;i<this.aot[this.turn-1];i++){
-        this.dice.push({num:Math.floor(Math.random()*6)+1})
+        if(this.mode === "daily"){n = this.dice_table.shift()}
+        else{n = Math.floor(Math.random()*6)+1}
+        this.dice.push({num:n})
       }
       let wc = this.workers.length
       for(let i=0;i<6-wc;i++){
         if(this.workers_deck.length > 0){
-          this.workers.push(this.workers_deck.pop())
+          this.workers.push(this.workers_deck.shift())
         }
       }
       this.rotResource()
@@ -924,6 +958,10 @@ const app = {
       if(this.rest === 0){this.status = ""}
     },
 
+    getVendorID(name){
+      return ["商人","行商人","家畜商人","園芸商人","食材商人"].indexOf(name)
+    },
+
     addAlert(msg){
       this.alert_str = msg
       this.showAlert = true
@@ -980,7 +1018,13 @@ const app = {
       this.usedCommands = []
     },
 
+    changeMode(){
+      this.mode = (this.mode === "daily") ? "normal" : "daily"
+      this.initGame()
+    },
+
     initGame(){
+      this.dice = []
       this.workers = []
       this.turn = 1
       this.endGame = false
@@ -1061,6 +1105,8 @@ const app = {
         {name:"豚",num:1},
         {name:"羊",num:1},
       ]
+      this.items_template = JSON.parse(JSON.stringify(this.items));
+
       this.facilities = [
         {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
         {name:"バター工房",des:"牛乳をバターに変える 残りを返却",cost:0,action:true},
@@ -1087,19 +1133,85 @@ const app = {
         {name:"物乞い",num:0},
       ]
 
-      this.shuffle(this.items)
-      this.merchants.push(this.items)
-      this.shuffle(this.workers_deck)
+      if(this.mode === "normal"){
+        this.shuffle(this.items)
+        this.merchants.push(this.items)
+        this.shuffle(this.workers_deck)
 
-      for(let i=0;i<2;i++){
-        this.dice.push({num:Math.floor(Math.random()*6)+1})
+        for(let i=0;i<2;i++){
+          this.dice.push({num:Math.floor(Math.random()*6)+1})
+        }
+      } else {
+        this.initDailyData()
       }
 
       for(let i=0;i<6;i++){
-        this.workers.push(this.workers_deck.pop())
+        this.workers.push(this.workers_deck.shift())
       }
 
       this.makeBuffer()
+    },
+
+    initDailyData(){
+      this.dice_table = [5, 1, 3, 4, 1, 4, 5, 6, 5, 2, 2, 1, 6, 2, 6, 5, 3, 3, 6, 6, 1, 5, 2, 1, 6]
+      for(let i=0;i<2;i++){
+        this.dice.push({num:this.dice_table.shift()})
+      }
+
+      let worker_table = [0, 19, 1, 27, 20, 26, 4, 24, 13, 9, 2, 16, 30, 28, 25, 18, 12, 21, 23, 11, 22, 3, 10, 5, 6, 17, 14, 15, 29, 7, 8]
+      let temp_deck = []
+      worker_table.forEach(e => {
+        temp_deck.push(this.workers_deck[e])
+      })
+      this.workers_deck = temp_deck
+      this.items_table = [
+        [2, 0, 5, 4, 1, 3],
+        [2, 3, 5, 1, 0, 4],
+        [0, 5, 3, 2, 6, 1],
+        [0, 5, 1, 4, 2, 6],
+        [5, 3, 0, 6, 1, 4],
+        [6, 3, 4, 5, 1, 2],
+        [3, 0, 4, 1, 5, 2],
+        [2, 5, 4, 0, 6, 3]]
+      this.items_table_plus = [
+        [4, 0, 1, 7, 6, 3, 5, 2],
+        [1, 6, 5, 4, 7, 2, 0, 3],
+        [4, 7, 0, 6, 3, 2, 5, 1],
+        [0, 6, 4, 2, 3, 1, 5, 7],
+        [6, 7, 2, 4, 5, 3, 0, 1],
+        [4, 3, 6, 5, 2, 0, 1, 7],
+        [6, 1, 7, 3, 2, 5, 0, 4],
+        [7, 6, 4, 0, 3, 2, 5, 1]]
+      this.merchants_item_table = [
+        [2, 3, 6, 0, 5, 7, 1, 4],
+        [3, 5, 2, 7, 4, 6, 0, 1],
+        [1, 5, 6, 0, 4, 3, 7, 2],
+        [4, 5, 0, 6, 2, 7, 3, 1]]
+      let numbers = this.items_table.shift()
+      let item_list = []
+      numbers.forEach(e => {
+        item_list.push(this.items[e])
+      })
+      this.items = item_list
+      this.merchants.push(this.items)
+    },
+
+    shuffleVendorFromTable(id){
+      if(id === 0){ //商人
+        let temp_items = []
+        this.items_table.shift().forEach(e => {
+          temp_items.push(this.items_template[e])
+        })
+        this.items = temp_items
+        this.merchants.push(this.items)
+      } else if(id === 1) { //行商人
+        let temp_items = []
+        this.items_table_plus[this.merchants_item_table[id-1][this.turn-1]].forEach(e => {
+          temp_items.push(this.vendors_list[id][e])
+        })
+        this.vendors_list[id] = temp_items
+        this.merchants.push(this.vendors_list[id])
+      }
     },
 
     mvp_str(){
