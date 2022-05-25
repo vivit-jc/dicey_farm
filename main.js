@@ -6,6 +6,8 @@ const app = {
       mode: "normal",
       viewStatus: "game",
       showAlert:false,
+      small: false,
+      omit: true,
       alert_str:"",
       tweet_str:"",
       turn:1,
@@ -113,9 +115,16 @@ const app = {
     },
     mode_str(){
       if(this.mode === "normal"){
-        return "Dailyでプレイ"
+        return "Dailyで遊ぶ"
       } else {
-        return "Normalでプレイ"
+        return "Normalで遊ぶ"
+      }
+    },
+    omit_str(){
+      if(this.omit){
+        return "省略OFF"
+      } else {
+        return "省略ON"
       }
     },
     vendors_list(){
@@ -128,8 +137,14 @@ const app = {
   },
 
   created() {
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
     console.log("Dicey Farm ver 1.01")
     this.initGame()    
+  },
+
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
   },
 
   methods: {
@@ -1211,6 +1226,16 @@ const app = {
       } else{
         return "他分野に渡って手広く展開するあなたの経営手腕は、他の牧場主からも一目置かれている"
       }
+    },
+    handleResize() {
+      if (window.innerWidth <= 1000) {
+          this.small = true
+      } else {
+          this.small = false
+      }
+    },
+    toggleOmit(){
+      this.omit = !this.omit
     }
   }
 }
