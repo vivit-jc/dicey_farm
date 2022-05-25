@@ -9,7 +9,7 @@
 <body>
   <div id="app">
     <h1 class="center" v-show="mode==='normal'">Dicey Farm</h1>
-    <h1 class="center" v-show="mode==='daily'">Dairy Dicey Farm</h1>
+    <h1 class="center" v-show="mode==='daily'">Daily Dicey Farm</h1>
     
     <div class="right">
       制作：vivit_jc
@@ -64,7 +64,7 @@
             </div>
           </div>
           <div class="row space" id="dice_space" v-show="endGame">
-            score: {{res_find("VP").num}} <span v-show="mode==='daily'">[daily mode]</span>
+            <div>score: {{res_find("VP").num}} <span v-show="mode==='daily'">[daily mode]</span></div>
             <div>
               <button @click="tweet_open" class="rounded-pill btn-sm">Tweet</button>
               <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>

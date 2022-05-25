@@ -1074,7 +1074,7 @@ const app = {
         {name:"ツアーガイド",des:"ゲーム終了時、観光化が完了しているなら10VP",passive:true},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",passive:true},
       ]
-      this.items = [
+      this.items_template[0] = [
         {name:"麦の種",num:2},
         {name:"野菜の種",num:2},
         {name:"花の種",num:2},
@@ -1082,6 +1082,7 @@ const app = {
         {name:"豚",num:1},
         {name:"羊",num:1},
       ]
+      this.items = this.items_template[0]
 
       this.facilities = [
         {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
