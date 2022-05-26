@@ -9,7 +9,7 @@
 <body>
   <div id="app">
     <h1 class="center" v-show="mode==='normal'">Dicey Farm</h1>
-    <h1 class="center" v-show="mode==='daily'">Dairy Dicey Farm</h1>
+    <h1 class="center" v-show="mode==='daily'">Daily Dicey Farm</h1>
     
     <div class="right">
       制作：vivit_jc
@@ -27,6 +27,7 @@
       <div class="row">
         <div class="col-12 col-lg-2 space" id="resources_space">
           <button type="button" @click="changeMode" class="btn btn-secondary btn-sm">{{mode_str}}</button>
+          <button type="button" @click="toggleOmit" class="btn btn-secondary btn-sm">{{omit_str}}</button>
           <div>
             <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
             <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
@@ -64,7 +65,7 @@
             </div>
           </div>
           <div class="row space" id="dice_space" v-show="endGame">
-            score: {{res_find("VP").num}}
+            <div>score: {{res_find("VP").num}} <span v-show="mode==='daily'">[daily mode]</span></div>
             <div>
               <button @click="tweet_open" class="rounded-pill btn-sm">Tweet</button>
               <button @click="initGame" class="rounded-pill btn-sm">もう一度遊ぶ</button>
@@ -77,7 +78,7 @@
           <div class="row space" id="action_space">
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
-                {{command.name}}<br><span class="des">{{command.des}}</span>
+                {{command.name}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
                 <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>

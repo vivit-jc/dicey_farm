@@ -6,6 +6,8 @@ const app = {
       mode: "normal",
       viewStatus: "game",
       showAlert:false,
+      small: false,
+      omit: true,
       alert_str:"",
       tweet_str:"",
       turn:1,
@@ -113,9 +115,16 @@ const app = {
     },
     mode_str(){
       if(this.mode === "normal"){
-        return "Dailyでプレイ"
+        return "Dailyで遊ぶ"
       } else {
-        return "Normalでプレイ"
+        return "Normalで遊ぶ"
+      }
+    },
+    omit_str(){
+      if(this.omit){
+        return "省略OFF"
+      } else {
+        return "省略ON"
       }
     },
     vendors_list(){
@@ -133,8 +142,14 @@ const app = {
   },
 
   created() {
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
     console.log("Dicey Farm ver 1.01")
     this.initGame()    
+  },
+
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
   },
 
   methods: {
@@ -319,7 +334,7 @@ const app = {
 
       this.memoVP("ウィスキー",this.res_find("ウィスキー").num)
 
-      if(this.turn === 3){
+      if(this.turn === 8){
         this.endGame = true
         this.memoVP("宝石",this.res_find("宝石").num*5)
         this.countWorkerVP()
@@ -556,6 +571,7 @@ const app = {
         if(r.num === 0){return false}
         r.num -= 1
         this.memoVP("ハム職人",9)
+        this.checkFieldsFilled()
       } else if(name === "ウィスキー職人"){
         let r = this.res_find("麦")
         if(r.num < 2){return false}
@@ -1015,6 +1031,10 @@ const app = {
       this.contracted = []
       this.fields = [{kind:"空き"}]
       this.field_die = ""
+      this.rest = 0
+      this.status = ""
+      this.resCooking = ""
+      this.holdingDie = ""
       this.sightDice = []
       this.usedCommands = []
       this.items2 = []
@@ -1078,7 +1098,7 @@ const app = {
         {name:"ツアーガイド",des:"ゲーム終了時、観光化が完了しているなら10VP",passive:true},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",passive:true},
       ]
-      this.items = [
+      this.items_template[0] = [
         {name:"麦の種",num:2},
         {name:"野菜の種",num:2},
         {name:"花の種",num:2},
@@ -1086,6 +1106,7 @@ const app = {
         {name:"豚",num:1},
         {name:"羊",num:1},
       ]
+      this.items = this.items_template[0]
 
       this.facilities = [
         {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
@@ -1215,6 +1236,16 @@ const app = {
       } else{
         return "他分野に渡って手広く展開するあなたの経営手腕は、他の牧場主からも一目置かれている"
       }
+    },
+    handleResize() {
+      if (window.innerWidth <= 1000) {
+          this.small = true
+      } else {
+          this.small = false
+      }
+    },
+    toggleOmit(){
+      this.omit = !this.omit
     }
   }
 }
