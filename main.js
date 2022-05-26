@@ -1171,7 +1171,7 @@ const app = {
         this.dice_table.push(rand.d6())
       }
 
-      rand.shuffle(this.workers_deck)
+      this.workers_deck = rand.shuffle(this.workers_deck)
       
       this.items_table = []
       for(let i=0;i<8;i++){
