@@ -1139,28 +1139,6 @@ const app = {
         this.dice.push({num:this.dice_table.shift()})
       }
 
-      let worker_table = [0, 19, 1, 27, 20, 26, 4, 24, 13, 9, 2, 16, 30, 28, 25, 18, 12, 21, 23, 11, 22, 3, 10, 5, 6, 17, 14, 15, 29, 7, 8]
-      let temp_deck = []
-      worker_table.forEach(e => {
-        temp_deck.push(this.workers_deck[e])
-      })
-      this.workers_deck = temp_deck
-      this.items_table = [
-        [4, 0, 1, 7, 6, 3, 5, 2],
-        [1, 6, 5, 4, 7, 2, 0, 3],
-        [4, 7, 0, 6, 3, 2, 5, 1],
-        [0, 6, 4, 2, 3, 1, 5, 7],
-        [6, 7, 2, 4, 5, 3, 0, 1],
-        [4, 3, 6, 5, 2, 0, 1, 7],
-        [6, 1, 7, 3, 2, 5, 0, 4],
-        [7, 6, 4, 0, 3, 2, 5, 1]]
-      this.merchants_item_table = [
-        [6, 2, 4, 3, 0, 7, 5, 1],
-        [2, 3, 6, 0, 5, 7, 1, 4],
-        [3, 5, 2, 7, 4, 6, 0, 1],
-        [1, 5, 6, 0, 4, 3, 7, 2],
-        [4, 5, 0, 6, 2, 7, 3, 1]]
-
       this.shuffleVendorFromTable(0)
     },
 
