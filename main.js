@@ -61,7 +61,7 @@ const app = {
       worker_table: [],
       items_table: [],
       items_table_plus: [],
-      merchants_item_table: []
+      merchants_item_table: [],
     }
   },
 
@@ -120,6 +120,11 @@ const app = {
     },
     vendors_list(){
       return [this.items,this.items2,this.items_animal,this.items_seeds,this.items_foods]
+    },
+    get_date_str(){
+      let date = new Date()
+      let date_str = ('00'+(date.getMonth()+1)).slice(-2)+('00'+date.getDate()).slice(-2)+date.getDay()
+      return date_str
     }
   },
 
@@ -323,7 +328,7 @@ const app = {
         this.saveScore()
         this.tweet_str = "https://twitter.com/intent/tweet?hashtags=dicey_farm&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Eshare%7Ctwgr%5E&text="+
         "score: "+this.res_find("VP").num+" "+this.mvp_str()
-        if(this.mode === "daily"){this.tweet_str += " %23ddf0525"}
+        if(this.mode === "daily"){this.tweet_str += " %23ddf"+this.get_date_str.slice(0,-1)}
         this.tweet_str += "&url=http%3A%2F%2Fintotheprow.sakura.ne.jp%2Fdicey_farm%2F"
         return true;
       }
@@ -1108,6 +1113,8 @@ const app = {
         {name:"物乞い",num:0},
       ]
 
+      this.setupRand()
+
       if(this.mode === "normal"){
         this.shuffle(this.items)
         this.merchants.push(this.items)
@@ -1128,7 +1135,6 @@ const app = {
     },
 
     initDailyData(){
-      this.dice_table = [5, 1, 3, 4, 1, 4, 5, 6, 5, 2, 2, 1, 6, 2, 6, 5, 3, 3, 6, 6, 1, 5, 2, 1, 6]
       for(let i=0;i<2;i++){
         this.dice.push({num:this.dice_table.shift()})
       }
@@ -1156,6 +1162,28 @@ const app = {
         [4, 5, 0, 6, 2, 7, 3, 1]]
 
       this.shuffleVendorFromTable(0)
+    },
+
+    setupRand(){
+      let rand = new Chance(this.get_date_str)
+
+      this.dice_table = []
+      for(let i=0;i<25;i++){
+        this.dice_table.push(rand.d6())
+      }
+
+      rand.shuffle(this.workers_deck)
+      
+      this.items_table = []
+      for(let i=0;i<8;i++){
+        this.items_table.push(rand.shuffle([0,1,2,3,4,5,6,7]))
+      }
+
+      this.merchants_item_table = []
+      for(let i=0;i<5;i++){
+        this.merchants_item_table.push(rand.shuffle([0,1,2,3,4,5,6,7]))
+      }
+      
     },
 
     shuffleVendorFromTable(id){
