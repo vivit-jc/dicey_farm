@@ -28,10 +28,8 @@
         <div class="col-12 col-lg-2 space" id="resources_space">
           <button type="button" @click="changeMode" class="btn btn-secondary btn-sm">{{mode_str}}</button>
           <button type="button" @click="toggleOmit" class="btn btn-secondary btn-sm">{{omit_str}}</button>
-          <div>
-            <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
-            <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
-          </div>
+          <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
+          <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
           <ul class="list-group" v-show="endGame">
             <li class="list-group-item vp_list" v-for="vp in vps" v-show='showVP(vp)'>
               {{vp.name}}:{{vp.num}}
@@ -45,7 +43,7 @@
             </li>
           </ul>
         </div>
-        <div class="col">
+        <div class="col-lg-10">
           <div class="row space" id="dice_space" v-show="!endGame">
             <div>
               <div>{{turn}} / 8ラウンド目 <span v-show="mode==='daily'">[daily mode]</span></div>
