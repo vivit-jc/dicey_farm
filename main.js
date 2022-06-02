@@ -4,6 +4,7 @@ const app = {
   data() {
     return {
       mode: "normal",
+      beta: true,
       viewStatus: "game",
       showAlert:false,
       small: false,
@@ -22,6 +23,7 @@ const app = {
       field_die:"",
       sightDice:[],
       endGame:false,
+      skip_trash_worker: false,
       merchants:[],
       merchants_str:["商人"],
       usedCommands:[],
@@ -35,15 +37,15 @@ const app = {
       aot:[2,2,3,3,3,4,4,4],
       resources: [],
       commands: [
-        {name:"釣り",des:"魚を(N-2)個得る（最低1）"},
+        {name:"釣り",des:"魚を得る 1,2:2 3,4:3 5,6:4"},
         {name:"畑を耕す",des:"畑を1つ増やす 同じ目なら2回可能"},
-        {name:"種を蒔く",des:"畑に種を蒔く 残りを返却"},
+        {name:"種を蒔く",des:"任意の数、畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可",vendor:true},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可",market:true},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
+        {name:"募集",des:"職人をN人残して残りを捨て、補充する"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
-        {name:"観光化",des:"ダイス1つ2VP 全部置くと+8VP 同じ目は置けない 何回でも可"},
-        {name:"日雇い労働",des:"食料3を得る"},
+        {name:"観光化",des:"任意のダイスの目をVPに変え、残りを返却"},
       ],
       items: [],
       items2:[],
@@ -134,6 +136,17 @@ const app = {
       let date = new Date()
       let date_str = ('00'+(date.getMonth()+1)).slice(-2)+('00'+date.getDate()).slice(-2)+date.getDay()
       return date_str
+    },
+    showUncontractedWorkerButton(){
+      if(this.status === 'contract' || this.status === 'trash_worker'){
+        return true
+      }
+      return false
+    },
+    uncontracted_worker_str(){
+      if(this.status === 'contract'){return "契約"}
+      else if(this.status === 'trash_worker'){return "捨てる"}
+      return false
     }
   },
 
@@ -166,8 +179,7 @@ const app = {
         return false
       }
       if(n === "釣り"){
-        let c = this.holdingDie.num-2
-        if(c <= 0){c = 1}
+        let c = Math.ceil(this.holdingDie.num/2)+1
         if(this.worker_find("釣り人")){c += 3}
         this.res_find("魚").num += c
       
@@ -203,7 +215,6 @@ const app = {
           return false
         }
         this.status = "seeding"
-        this.rest = this.holdingDie.num
         if(this.worker_find("種まき人")) {repeatable = true}
       
       } else if(n === "契約"){
@@ -217,15 +228,14 @@ const app = {
         if(this.worker_find("斡旋業者")){this.cost = 1}
 
       } else if(n === "募集"){
-        if(this.holdingDie.num > this.workers.length+4){
-          this.addAlert("捨てる人数が多すぎます")
+        if(this.holdingDie.num > this.workers.length){
+          this.addAlert(this.holdingDie.num + "人の職人を残すことはできません")
           return false
         }
-        for(let i=0;i<4;i++){
-          this.workers.push(this.workers_deck.shift())
-        }
-        this.rest = this.holdingDie.num
-        this.status = "trash_worker"
+        this.rest = this.workers.length - this.holdingDie.num
+        if(this.rest === 0){ this.fillWorker() } //残りの職人と同数のダイスを置いた時は、即座に補充する
+        else{this.status = "trash_worker"}
+        this.skip_trash_worker = true
 
       } else if(n === "出荷"){
         this.rest = this.holdingDie.num+2
@@ -282,12 +292,14 @@ const app = {
       let f = this.empty_field 
       f.kind = seed.name
       seed.num -= 1
-      this.decRest()
       if(!this.empty_field){
-        if(this.rest > 0){this.dice.push({num:this.rest})} //返却
         this.status = ""
-        this.rest = 0
       }
+    },
+
+    clickUncontractWorker(worker){
+      if(this.status === "contract"){ this.contractWorker(worker) }
+      else if(this.status === 'trash_worker'){ this.trashWorker(worker) }
     },
 
     contractWorker: function(worker){
@@ -307,6 +319,7 @@ const app = {
     trashWorker: function(worker){
       this.workers.splice(this.workers.indexOf(worker), 1)
       this.decRest()
+      if(this.rest === 0){ this.fillWorker() }
     },
 
     makeFacility: function(facility){
@@ -351,7 +364,6 @@ const app = {
       this.turn += 1
       this.field_die = ""
       this.usedCommands = []
-      this.workers.splice(0, 2)
       
       if(this.turn === 3){
         this.items_template[0].push({name:"牛",num:1})
@@ -374,12 +386,14 @@ const app = {
         else{n = Math.floor(Math.random()*6)+1}
         this.dice.push({num:n})
       }
-      let wc = this.workers.length
-      for(let i=0;i<6-wc;i++){
-        if(this.workers_deck.length > 0){
-          this.workers.push(this.workers_deck.shift())
-        }
+      
+      if(this.skip_trash_worker){
+        this.skip_trash_worker = false
+      } else {
+        this.workers.splice(0, 2)
       }
+      this.fillWorker()
+
       this.rotResource()
       this.growPlantsAndAnimals()
       if(this.worker_find("世話人")){this.res_find("食料").num+=2}
@@ -390,7 +404,7 @@ const app = {
     endCommand(name){
       this.status = ""
       if(this.rest === 0){return true}
-      if(name === "種を蒔く" || name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
+      if(name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
         this.dice.push({num:this.rest})
       }
     },
@@ -440,6 +454,15 @@ const app = {
       })
     },
 
+    fillWorker(){
+      let wc = this.workers.length
+      for(let i=0;i<6-wc;i++){
+        if(this.workers_deck.length > 0){
+          this.workers.push(this.workers_deck.shift())
+        }
+      }
+    },
+
     showButton: function(command,str){
       if(str === "終わる" ){
         if(this.status === "market" && command.name === "出荷"){
@@ -461,9 +484,7 @@ const app = {
     },
 
     showRest: function(command) {
-      if(this.status === "seeding" && command.name === "種を蒔く"){
-        return true;
-      } else if(this.status === "trash_worker" && command.name === "募集"){
+      if(this.status === "trash_worker" && command.name === "募集"){
         return true;
       } else if(this.status === "market" && command.name === "出荷"){
         return true;
@@ -1148,9 +1169,7 @@ const app = {
         this.initDailyData()
       }
 
-      for(let i=0;i<6;i++){
-        this.workers.push(this.workers_deck.shift())
-      }
+      this.fillWorker()
 
       this.makeBuffer()
     },

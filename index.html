@@ -125,8 +125,7 @@
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item worker" v-for="worker in workers" v-bind:class="[{market:worker.market},command_style(worker)]">
                 {{worker.name}}<br><span class="des">{{worker.des}}</span><br>
-                <button type="button" @click="contractWorker(worker)" v-show="status==='contract'" class="rounded-pill btn-sm">契約</button>
-                <button type="button" @click="trashWorker(worker)" v-show="status==='trash_worker'" class="rounded-pill btn-sm">捨てる</button>
+                <button type="button" @click="clickUncontractWorker(worker)" v-show="showUncontractedWorkerButton" class="rounded-pill btn-sm">{{uncontracted_worker_str}}</button>
               </li>
             </ul>
           </div>
