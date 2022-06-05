@@ -31,6 +31,7 @@ const app = {
       workers: [],
       workers_deck: [],
       contracted:[],
+      remain_worker:[],
       fields: [],
       resCooking: "",
       buffer:[],
@@ -137,15 +138,9 @@ const app = {
       let date_str = ('00'+(date.getMonth()+1)).slice(-2)+('00'+date.getDate()).slice(-2)+date.getDay()
       return date_str
     },
-    showUncontractedWorkerButton(){
-      if(this.status === 'contract' || this.status === 'trash_worker'){
-        return true
-      }
-      return false
-    },
     uncontracted_worker_str(){
       if(this.status === 'contract'){return "契約"}
-      else if(this.status === 'trash_worker'){return "捨てる"}
+      else if(this.status === 'trash_worker'){return "残す"}
       return false
     }
   },
@@ -232,9 +227,8 @@ const app = {
           this.addAlert(this.holdingDie.num + "人の職人を残すことはできません")
           return false
         }
-        this.rest = this.workers.length - this.holdingDie.num
-        if(this.rest === 0){ this.fillWorker() } //残りの職人と同数のダイスを置いた時は、即座に補充する
-        else{this.status = "trash_worker"}
+        this.rest = this.holdingDie.num
+        this.status = "trash_worker"
         this.skip_trash_worker = true
 
       } else if(n === "出荷"){
@@ -317,9 +311,15 @@ const app = {
     },
 
     trashWorker: function(worker){
-      this.workers.splice(this.workers.indexOf(worker), 1)
+      worker.remain = true
       this.decRest()
-      if(this.rest === 0){ this.fillWorker() }
+      if(this.rest === 0){ 
+        this.workers = this.workers.filter(e => e.remain)
+        this.fillWorker() 
+        this.workers.forEach(e=>{
+          e.remain = false
+        })
+      }
     },
 
     makeFacility: function(facility){
@@ -525,6 +525,15 @@ const app = {
       } else if(this.status === "market" && !worker.dice){
         return true;
       }
+    },
+
+    showUncontractedWorkerButton(worker){
+      if(this.status === 'contract'){
+        return true
+      } else if(this.status === 'trash_worker' && !worker.remain){
+        return true
+      }
+      return false
     },
 
     food_changeable: function(res){
