@@ -31,7 +31,6 @@ const app = {
       workers: [],
       workers_deck: [],
       contracted:[],
-      remain_worker:[],
       fields: [],
       resCooking: "",
       buffer:[],
@@ -56,7 +55,7 @@ const app = {
       items_template: [
         [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"鶏",num:1},{name:"豚",num:1},{name:"羊",num:1}],
         [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"鶏",num:1},{name:"豚",num:1},{name:"羊",num:1},{name:"牛",num:1},{name:"宝石",num:1}],
-        [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"豚",num:2}],
+        [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"馬",num:1}],
         [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"麦の種",num:3},{name:"野菜の種",num:3},{name:"花の種",num:3}],
         [{name:"牛乳",num:2},{name:"卵",num:2},{name:"魚",num:2},{name:"麦",num:2},{name:"肉",num:1},{name:"野菜",num:2}]
       ],
@@ -191,15 +190,20 @@ const app = {
         this.fields.push({kind:"空き"})
         if(this.worker_find("牛飼い") && this.res_find("牛").num>0){this.fields.push({kind:"空き"})}
 
-      } else if(command.vendor){
+      } else if(command.vendor){ //商人系のアクション
         let item = this.vendors_list[this.getVendorID(n)][this.holdingDie.num-1]
           
-        if(this.isAnimal(this.res_find(item.name))){ //動物を買う場合
-          if(!this.existEmptyFieldForAnimal(item.name)){
+        if(this.isAnimal(this.res_find(item.name)) || item.name === "馬"){ //動物を買う場合
+          if(item.name === "馬" && this.worker_find("馬小屋")){
+            // 馬小屋がある場合は空いた畑のチェックを飛ばす
+          } else if(!this.existEmptyFieldForAnimal(item.name)){
             this.addAlert("新しい家畜を買うための空いた畑がありません")
             return false;
           }
           if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
+        }
+        if(item.name === "馬"){
+          this.workers.push({name:"馬",des:"ダイスを使わない 出荷を2回行う",market:true})
         }
         this.res_find(item.name).num += item.num
         repeatable = true
@@ -329,6 +333,12 @@ const app = {
       if(facility.name === "燻製小屋"){
         this.res_find("肉").rot = ""
         this.res_find("魚").rot = "" 
+      } else if(facility.name === "馬小屋"){
+        this.res_find("馬").num += 1
+        this.contracted.push({name:"馬",des:"ダイスを使わない 出荷を2回行う",market:true})
+        if(this.fields.find(f => f.kind === "馬")){
+          this.fields.find(f => f.kind === "馬").kind = "空き"
+        }
       }
     },
 
@@ -450,7 +460,7 @@ const app = {
           this.res_find("花").num += 2 + compost
           if(w){this.res_find("花の種").num += 1}
         }
-        if(!this.isAnimal(e.kind)){e.kind = "空き"}
+        if(!(this.isAnimal(e.kind) || e.kind === "馬")){e.kind = "空き"}
       })
     },
 
@@ -516,6 +526,8 @@ const app = {
         return ["麦1>食料2","麦2>VP3"]
       } else if(name === "ソーセージ職人"){
         return [">食料2",">VP3"]
+      } else if(name === "馬"){
+        return ["出荷"]
       }
     },
 
@@ -523,6 +535,8 @@ const app = {
       if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
         return true;
       } else if(this.status === "market" && !worker.dice){
+        return true;
+      } else if(worker.name === "馬" && !this.usedCommand(worker.name)){
         return true;
       }
     },
@@ -807,6 +821,10 @@ const app = {
         this.decRest()
         this.res_find("肉").num += this.meatAmount(r)
         this.checkFieldsFilled()
+      } else if(n === "馬"){
+        this.rest = 2
+        this.status = "market"
+        this.usedCommands.push("馬")
       }
     },
 
@@ -879,7 +897,7 @@ const app = {
     },
 
     existEmptyFieldForAnimal: function(name){
-      if(!(name === "鶏" || name === "羊" || name === "豚" || name === "牛")){return false}
+      if(name != "鶏" && name != "羊" && name != "豚" && name != "牛" && name != "馬"){return false}
       if(this.fields.find(e => e.kind === name)){return true}
       else if(this.empty_field){return true}
       return false
@@ -1086,6 +1104,7 @@ const app = {
         {name:"羊",num:0},
         {name:"豚",num:0},
         {name:"牛",num:0},
+        {name:"馬",num:0},
         {name:"肉",num:0,rot:"▲"},
         {name:"卵",num:0,rot:"▲"},
         {name:"牛乳",num:0,rot:"▲"},
@@ -1139,11 +1158,11 @@ const app = {
       this.items = this.items_template[0]
 
       this.facilities = [
-        {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
-        {name:"バター工房",des:"牛乳をバターに変える 残りを返却",cost:0,action:true},
-        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8 (N-1)を返却",cost:0,action:true},
-        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0,passive:true},
-        {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0,passive:true},
+        {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",action:true},
+        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8 (N-1)を返却",action:true},
+        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",passive:true},
+        {name:"燻製小屋",des:"肉、魚が腐らなくなる",passive:true},
+        {name:"馬小屋",des:"馬を1つ得る 馬は畑を専有しない",passive:true},
       ]
       this.vps = [
         {name:"市場",num:0},
