@@ -73,11 +73,11 @@
               <li class="list-group-item small" v-for="(rank, index) in ranks" v-bind:class="{recent:recentResult(index)}">{{rank_str(index)}}:{{rank}}</li>
             </ul>
           </div>
-          <div class="row space" id="action_space">
+          <div class="row space position-relative" id="action_space">
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-secondary" v-show="rest>0">残り{{rest}}</span>
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
-                <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
               </li>
@@ -85,7 +85,6 @@
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{passive:command.passive},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
-                <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
                 <button type="button" @click="change_by_worker(command.name)" v-show='showButton(command,"出荷")' class="rounded-pill btn-sm">出荷</button>
                 <button type="button" @click="clickWorkerCommand(command,button)" v-show='showWorkerButtons(command,button)' v-for="button in workerButtons(command.name)" :key="command" class="rounded-pill btn-sm">{{button}}</button>

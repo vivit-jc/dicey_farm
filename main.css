@@ -176,3 +176,9 @@ h1: {
 .v-leave-to {
     opacity: 0;
 }
+
+.badge {
+  width: 80px !important;
+  font-size: 18px !important;
+  z-index: 1;
+}
