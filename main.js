@@ -974,7 +974,7 @@ const app = {
     },
 
     showBeta: function(){
-      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/beta.md';
+      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/e953fe3bfbae5676496c7fbfa937cf4154f4307c/beta.md';
       let Name = 'dicey_farm_beta_doc';
       window.open(URL,Name);
     },
