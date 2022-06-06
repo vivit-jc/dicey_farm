@@ -206,7 +206,7 @@ const app = {
           if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
         }
         if(item.name === "馬"){
-          this.workers.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
+          this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
         }
         this.res_find(item.name).num += item.num
         repeatable = true
@@ -241,6 +241,7 @@ const app = {
       } else if(n === "出荷"){
         this.rest = this.holdingDie.num+2
         if(this.worker_find("荷運び")){this.rest += 3}
+        this.rest += this.res_find("馬").num
         this.status = "market"
         if(this.turn === 8){repeatable = true}
       
@@ -491,7 +492,7 @@ const app = {
         } else if(this.status === "butchering" && command.name === "解体小屋"){
           return true;
         }
-      }else if(str === "出荷"){
+      } else if(str === "出荷"){
         if(this.status_market && this.worker_find(command.name).change){
           return true;
         }
