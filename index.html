@@ -78,8 +78,9 @@
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}{{showFieldDie(command.name)}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
-                <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
+                <p class="des" v-show="command.name==='観光化'">[{{vps.find(e=>e.name==="観光化").num}}]</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
+                <button type="button" class="rounded-pill btn-sm" v-for="num in sight_numbers" @click="sight_die(num)" v-show="status==='touristy' && command.name==='観光化'">{{cost-num}}</button>
               </li>
             </ul>
             <ul class="list-group list-group-horizontal" >

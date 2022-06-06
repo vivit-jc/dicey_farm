@@ -16,12 +16,11 @@ const app = {
       status:"",
       rest:0,
       cost:0,
-      penalty:0,
       activeItem:"",
       selectedItem:"",
       holdingDie:"",
       field_die:"",
-      sightDice:[],
+      sight_numbers:[],
       endGame:false,
       skip_trash_worker: false,
       merchants:[],
@@ -45,7 +44,7 @@ const app = {
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
         {name:"募集",des:"職人をN人残して残りを捨て、補充する"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
-        {name:"観光化",des:"任意のダイスの目をVPに変え、残りを返却"},
+        {name:"観光化",des:"ダイスの目をVPに変え、残りを返却 最大20"},
       ],
       items: [],
       items2:[],
@@ -254,25 +253,17 @@ const app = {
         this.status = "facility"
 
       } else if(n === "観光化"){
-        if(this.sightDice.find(e => e === this.holdingDie.num)){
-          this.addAlert("そのダイスは既に使われています")
-          return false
+        for(let i=1;i<this.holdingDie.num+1;i++){
+          this.sight_numbers.push(i)
         }
-        this.sightDice.push(this.holdingDie.num)
-        this.memoVP("観光化",2)
-        if(this.sightDice.length === 6){this.memoVP("観光化",8)}
-        this.sightDice.sort()
-        repeatable = true
+        this.status = "touristy"
+        this.cost = this.holdingDie.num
 
       } else if(n === "日雇い労働"){
         this.res_find("食料").num += 3
 
       } else if(n === "パン焼き釜"){
         this.status = "bread"
-        this.rest = this.holdingDie.num
-
-      } else if(n === "バター工房"){
-        this.status = "butter"
         this.rest = this.holdingDie.num
 
       } else if(n === "解体小屋"){
@@ -346,6 +337,16 @@ const app = {
       }
     },
 
+    sight_die(n){
+      this.memoVP("観光化",n)
+      let vps = this.vps.find(e=>e.name==="観光化")
+      if(vps.num >= 20){ vps.num = 20 }
+      if(this.cost-n > 0){this.dice.push({num:this.cost-n})}
+      this.status = ""
+      this.cost = ""
+      this.sight_numbers = []
+    },
+
     deleteDie: function(){
       this.dice.splice(this.dice.indexOf(this.holdingDie), 1)
       this.holdingDie = ""
@@ -412,7 +413,6 @@ const app = {
       this.growPlantsAndAnimals()
       if(this.worker_find("世話人")){this.res_find("食料").num+=2}
       this.makeBuffer()
-
     },
 
     endCommand(name){
@@ -420,9 +420,8 @@ const app = {
       if(this.rest === 0){return true}
       if(name === "パン焼き釜" || name === "解体小屋"){
         this.dice.push({num:this.rest})
-      } else {
-        this.rest = 0
       }
+      this.rest = 0
     },
 
     rotResource: function(){
@@ -487,8 +486,6 @@ const app = {
           return true;
         } else if(this.status === "bread" && command.name === "パン焼き釜"){
           return true;
-        } else if(this.status === "butter" && command.name === "バター工房"){
-          return true;
         } else if(this.status === "butchering" && command.name === "解体小屋"){
           return true;
         }
@@ -497,14 +494,6 @@ const app = {
           return true;
         }
       }
-    },
-
-    showSight(command){
-      return command.name === "観光化"
-    },
-
-    showDice(){
-      return this.sightDice.join()
     },
 
     showFieldDie(name){
@@ -692,8 +681,6 @@ const app = {
         return true
       } else if(this.status === "bread" && n === "麦"){
         return true
-      } else if(this.status === "butter" && n === "牛乳"){
-        return true
       } else if(this.status === "butchering" && this.isAnimal(res)){
         return true
       } 
@@ -738,10 +725,6 @@ const app = {
       } else if(this.status === "bread"){
         res.num -= 1
         this.res_find("食料").num += 2
-        this.decRest()
-      } else if(this.status === "butter"){
-        res.num -= 1
-        this.res_find("バター").num += 1
         this.decRest()
       } else if(this.status === "butchering"){
         res.num -= 1
@@ -856,7 +839,7 @@ const app = {
     },
 
     food_change_str: function(res){
-      if(this.status === "" || this.status === "bread" || this.status === "butter"){
+      if(this.status === ""){
         return ">食料1"
       } else if(this.status === "cooking") {
         return "料理"
@@ -874,8 +857,6 @@ const app = {
         return "蒔く"
       } else if(this.status === "bread" && n === "麦"){
         return ">2食料"
-      } else if(this.status === "butter" && n === "牛乳"){
-        return ">バター"
       } else if(this.status === "butchering" && this.isAnimal(res)){
         return ">肉"+this.meatAmount(res)
       } 
