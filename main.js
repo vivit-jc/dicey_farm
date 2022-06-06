@@ -525,14 +525,16 @@ const app = {
     },
 
     showWorkerButtons(worker,button){
-      if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
+      if(worker.name === "馬"){
+        if(this.status === "" && !this.usedCommand(worker.name)){
+          return true; // 「出荷」を表示
+        } else if(this.status === "horse_market"){
+          return true; // 「終わる」を表示
+        }
+      } else if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
         return true;
       } else if(this.status_market && !worker.dice){
         return true;
-      } else if(worker.name === "馬"){
-        if(this.status === "horse_market" || !this.usedCommand(worker.name)){
-          return true;
-        }
       }
     },
 
