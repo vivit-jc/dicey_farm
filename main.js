@@ -141,6 +141,9 @@ const app = {
       if(this.status === 'contract'){return "契約"}
       else if(this.status === 'trash_worker'){return "残す"}
       return false
+    },
+    status_market(){
+      return (this.status === "market" || this.status === "horse_market")
     }
   },
 
@@ -203,7 +206,7 @@ const app = {
           if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
         }
         if(item.name === "馬"){
-          this.workers.push({name:"馬",des:"ダイスを使わない 出荷を2回行う",market:true})
+          this.workers.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
         }
         this.res_find(item.name).num += item.num
         repeatable = true
@@ -335,7 +338,7 @@ const app = {
         this.res_find("魚").rot = "" 
       } else if(facility.name === "馬小屋"){
         this.res_find("馬").num += 1
-        this.contracted.push({name:"馬",des:"ダイスを使わない 出荷を2回行う",market:true})
+        this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
         if(this.fields.find(f => f.kind === "馬")){
           this.fields.find(f => f.kind === "馬").kind = "空き"
         }
@@ -414,8 +417,10 @@ const app = {
     endCommand(name){
       this.status = ""
       if(this.rest === 0){return true}
-      if(name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
+      if(name === "パン焼き釜" || name === "解体小屋"){
         this.dice.push({num:this.rest})
+      } else {
+        this.rest = 0
       }
     },
 
@@ -487,21 +492,9 @@ const app = {
           return true;
         }
       }else if(str === "出荷"){
-        if(this.status === "market" && this.worker_find(command.name).change){
+        if(this.status_market && this.worker_find(command.name).change){
           return true;
         }
-      }
-    },
-
-    showRest: function(command) {
-      if(this.status === "trash_worker" && command.name === "募集"){
-        return true;
-      } else if(this.status === "market" && command.name === "出荷"){
-        return true;
-      } else if(this.status === "bread" && command.name === "パン焼き釜"){
-        return true
-      } else if(this.status === "butter" && command.name === "バター工房"){
-        return true;
       }
     },
 
@@ -527,17 +520,20 @@ const app = {
       } else if(name === "ソーセージ職人"){
         return [">食料2",">VP3"]
       } else if(name === "馬"){
-        return ["出荷"]
+        if(this.status === "horse_market"){ return ["終わる"] }
+        else { return ["出荷"] }
       }
     },
 
     showWorkerButtons(worker,button){
       if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
         return true;
-      } else if(this.status === "market" && !worker.dice){
+      } else if(this.status_market && !worker.dice){
         return true;
-      } else if(worker.name === "馬" && !this.usedCommand(worker.name)){
-        return true;
+      } else if(worker.name === "馬"){
+        if(this.status === "horse_market" || !this.usedCommand(worker.name)){
+          return true;
+        }
       }
     },
 
@@ -683,7 +679,7 @@ const app = {
 
     show_if_res_command: function(res){
       let n = res.name
-      if(this.status === "market" && this.sellable(res)){
+      if(this.status_market && this.sellable(res)){
         return true;
       } else if(this.status === "seeding" && this.isSeed(res)){
         return true
@@ -728,7 +724,7 @@ const app = {
     },
 
     clickResCommand: function(res){
-      if(this.status === "market"){
+      if(this.status_market){
         this.change_to_vp(res)
       } else if(this.status === "seeding"){
         this.doSeed(res)
@@ -822,9 +818,13 @@ const app = {
         this.res_find("肉").num += this.meatAmount(r)
         this.checkFieldsFilled()
       } else if(n === "馬"){
-        this.rest = 2
-        this.status = "market"
-        this.usedCommands.push("馬")
+        if(button === "出荷"){
+          this.rest = 2
+          this.status = "horse_market"
+          this.usedCommands.push("馬")
+        } else if(button === "終わる"){
+          this.endCommand("馬")
+        }
       }
     },
 
@@ -858,7 +858,7 @@ const app = {
 
     res_command_str: function(res){
       let n = res.name
-      if(this.status === "market"){
+      if(this.status_market){
         if(n === "麦"){
           return "2>1VP"
         }
