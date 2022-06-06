@@ -30,6 +30,7 @@
           <button type="button" @click="toggleOmit" class="btn btn-secondary btn-sm">{{omit_str}}</button>
           <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
           <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
+          <button type="button" @click="showBeta" class="btn btn-secondary btn-sm">β変更点</button>
           <ul class="list-group" v-show="endGame">
             <li class="list-group-item vp_list" v-for="vp in vps" v-show='showVP(vp)'>
               {{vp.name}}:{{vp.num}}

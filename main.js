@@ -973,6 +973,12 @@ const app = {
       window.open(URL,Name);
     },
 
+    showBeta: function(){
+      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/beta.md';
+      let Name = 'dicey_farm_beta_doc';
+      window.open(URL,Name);
+    },
+
     tweet_open(){
       let URL = this.tweet_str
       let Name = 'dicey_farm_tweet';
