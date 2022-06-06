@@ -77,7 +77,7 @@
             <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-secondary" v-show="rest>0">残り{{rest}}</span>
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
-                {{command.name}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
+                {{command.name}}{{showFieldDie(command.name)}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
                 <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
               </li>

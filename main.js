@@ -507,6 +507,12 @@ const app = {
       return this.sightDice.join()
     },
 
+    showFieldDie(name){
+      if(name === "畑を耕す" && this.field_die){
+        return "["+this.field_die+"]"
+      }
+    },
+
     workerButtons: function(name){
       if(name === "役人"){
         return ["ひっくり返す"]
