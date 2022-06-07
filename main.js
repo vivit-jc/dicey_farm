@@ -153,7 +153,7 @@ const app = {
   created() {
     window.addEventListener('resize', this.handleResize)
     this.handleResize()
-    console.log("Dicey Farm ver 1.01")
+    console.log("Dicey Farm ver 1.02")
     this.initGame()    
   },
 
@@ -978,6 +978,12 @@ const app = {
     showBeta: function(){
       let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/beta.md';
       let Name = 'dicey_farm_beta_doc';
+      window.open(URL,Name);
+    },
+
+    showUpdates: function(){
+      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/updates.md';
+      let Name = 'dicey_farm_updates_doc';
       window.open(URL,Name);
     },
 
