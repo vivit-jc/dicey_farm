@@ -4,6 +4,7 @@ const app = {
   data() {
     return {
       mode: "normal",
+      beta: true,
       viewStatus: "game",
       showAlert:false,
       small: false,
@@ -15,13 +16,13 @@ const app = {
       status:"",
       rest:0,
       cost:0,
-      penalty:0,
       activeItem:"",
       selectedItem:"",
       holdingDie:"",
       field_die:"",
-      sightDice:[],
+      sight_numbers:[],
       endGame:false,
+      skip_trash_worker: false,
       merchants:[],
       merchants_str:["商人"],
       usedCommands:[],
@@ -35,15 +36,15 @@ const app = {
       aot:[2,2,3,3,3,4,4,4],
       resources: [],
       commands: [
-        {name:"釣り",des:"魚を(N-2)個得る（最低1）"},
+        {name:"釣り",des:"魚を得る 1,2:2 3,4:3 5,6:4"},
         {name:"畑を耕す",des:"畑を1つ増やす 同じ目なら2回可能"},
-        {name:"種を蒔く",des:"畑に種を蒔く 残りを返却"},
+        {name:"種を蒔く",des:"任意の数、畑に種を蒔く"},
         {name:"商人",des:"リストの品物を買う 何回でも可",vendor:true},
         {name:"出荷",des:"市場か職人に出荷する(N+2回) 8Rだけ何回でも可",market:true},
         {name:"契約",des:"食料Nを払って職人1人と契約する"},
+        {name:"募集",des:"職人をN人残して残りを捨て、補充する"},
         {name:"増築",des:"設備を1つ建てる 6しか置けない"},
-        {name:"観光化",des:"ダイス1つ2VP 全部置くと+8VP 同じ目は置けない 何回でも可"},
-        {name:"日雇い労働",des:"食料3を得る"},
+        {name:"観光化",des:"ダイスの目をVPに変え、残りを返却 最大20"},
       ],
       items: [],
       items2:[],
@@ -53,9 +54,9 @@ const app = {
       items_template: [
         [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"鶏",num:1},{name:"豚",num:1},{name:"羊",num:1}],
         [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"鶏",num:1},{name:"豚",num:1},{name:"羊",num:1},{name:"牛",num:1},{name:"宝石",num:1}],
-        [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"豚",num:2}],
+        [{name:"鶏",num:1},{name:"羊",num:1},{name:"豚",num:1},{name:"牛",num:1},{name:"鶏",num:2},{name:"馬",num:1}],
         [{name:"麦の種",num:2},{name:"野菜の種",num:2},{name:"花の種",num:2},{name:"麦の種",num:3},{name:"野菜の種",num:3},{name:"花の種",num:3}],
-        [{name:"牛乳",num:2},{name:"卵",num:2},{name:"魚",num:2},{name:"麦",num:2},{name:"肉",num:1},{name:"野菜",num:2}]
+        [{name:"牛乳",num:3},{name:"卵",num:3},{name:"魚",num:3},{name:"麦",num:4},{name:"肉",num:2},{name:"野菜",num:3}]
       ],
       facilities: [],
       vps:[],
@@ -134,6 +135,14 @@ const app = {
       let date = new Date()
       let date_str = ('00'+(date.getMonth()+1)).slice(-2)+('00'+date.getDate()).slice(-2)+date.getDay()
       return date_str
+    },
+    uncontracted_worker_str(){
+      if(this.status === 'contract'){return "契約"}
+      else if(this.status === 'trash_worker'){return "残す"}
+      return false
+    },
+    status_market(){
+      return (this.status === "market" || this.status === "horse_market")
     }
   },
 
@@ -144,7 +153,7 @@ const app = {
   created() {
     window.addEventListener('resize', this.handleResize)
     this.handleResize()
-    console.log("Dicey Farm ver 1.01")
+    console.log("Dicey Farm ver 1.02")
     this.initGame()    
   },
 
@@ -166,8 +175,7 @@ const app = {
         return false
       }
       if(n === "釣り"){
-        let c = this.holdingDie.num-2
-        if(c <= 0){c = 1}
+        let c = Math.ceil(this.holdingDie.num/2)+1
         if(this.worker_find("釣り人")){c += 3}
         this.res_find("魚").num += c
       
@@ -184,15 +192,20 @@ const app = {
         this.fields.push({kind:"空き"})
         if(this.worker_find("牛飼い") && this.res_find("牛").num>0){this.fields.push({kind:"空き"})}
 
-      } else if(command.vendor){
+      } else if(command.vendor){ //商人系のアクション
         let item = this.vendors_list[this.getVendorID(n)][this.holdingDie.num-1]
           
-        if(this.isAnimal(this.res_find(item.name))){ //動物を買う場合
-          if(!this.existEmptyFieldForAnimal(item.name)){
+        if(this.isAnimal(this.res_find(item.name)) || item.name === "馬"){ //動物を買う場合
+          if(item.name === "馬" && this.worker_find("馬小屋")){
+            // 馬小屋がある場合は空いた畑のチェックを飛ばす
+          } else if(!this.existEmptyFieldForAnimal(item.name)){
             this.addAlert("新しい家畜を買うための空いた畑がありません")
             return false;
           }
           if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
+        }
+        if(item.name === "馬"){
+          this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
         }
         this.res_find(item.name).num += item.num
         repeatable = true
@@ -203,8 +216,7 @@ const app = {
           return false
         }
         this.status = "seeding"
-        this.rest = this.holdingDie.num
-        if(this.worker_find("種まき人")) {repeatable = true}
+        if(this.worker_find("種まき人")) {this.dice.push({num:1})}
       
       } else if(n === "契約"){
         if(this.worker_find("斡旋業者") && this.res_find("食料").num > 0){}
@@ -214,22 +226,24 @@ const app = {
         }
         this.status = "contract"
         this.cost = this.holdingDie.num
-        if(this.worker_find("斡旋業者")){this.cost = 1}
+        if(this.worker_find("斡旋業者")){
+          this.cost = 1
+          repeatable = true
+        }
 
       } else if(n === "募集"){
-        if(this.holdingDie.num > this.workers.length+4){
-          this.addAlert("捨てる人数が多すぎます")
+        if(this.holdingDie.num > this.workers.length){
+          this.addAlert(this.holdingDie.num + "人の職人を残すことはできません")
           return false
-        }
-        for(let i=0;i<4;i++){
-          this.workers.push(this.workers_deck.shift())
         }
         this.rest = this.holdingDie.num
         this.status = "trash_worker"
+        this.skip_trash_worker = true
 
       } else if(n === "出荷"){
         this.rest = this.holdingDie.num+2
         if(this.worker_find("荷運び")){this.rest += 3}
+        this.rest += this.res_find("馬").num
         this.status = "market"
         if(this.turn === 8){repeatable = true}
       
@@ -242,25 +256,17 @@ const app = {
         this.status = "facility"
 
       } else if(n === "観光化"){
-        if(this.sightDice.find(e => e === this.holdingDie.num)){
-          this.addAlert("そのダイスは既に使われています")
-          return false
+        for(let i=1;i<this.holdingDie.num+1;i++){
+          this.sight_numbers.push(i)
         }
-        this.sightDice.push(this.holdingDie.num)
-        this.memoVP("観光化",2)
-        if(this.sightDice.length === 6){this.memoVP("観光化",8)}
-        this.sightDice.sort()
-        repeatable = true
+        this.status = "touristy"
+        this.cost = this.holdingDie.num
 
       } else if(n === "日雇い労働"){
         this.res_find("食料").num += 3
 
       } else if(n === "パン焼き釜"){
         this.status = "bread"
-        this.rest = this.holdingDie.num
-
-      } else if(n === "バター工房"){
-        this.status = "butter"
         this.rest = this.holdingDie.num
 
       } else if(n === "解体小屋"){
@@ -282,12 +288,14 @@ const app = {
       let f = this.empty_field 
       f.kind = seed.name
       seed.num -= 1
-      this.decRest()
       if(!this.empty_field){
-        if(this.rest > 0){this.dice.push({num:this.rest})} //返却
         this.status = ""
-        this.rest = 0
       }
+    },
+
+    clickUncontractWorker(worker){
+      if(this.status === "contract"){ this.contractWorker(worker) }
+      else if(this.status === 'trash_worker'){ this.trashWorker(worker) }
     },
 
     contractWorker: function(worker){
@@ -305,8 +313,15 @@ const app = {
     },
 
     trashWorker: function(worker){
-      this.workers.splice(this.workers.indexOf(worker), 1)
+      worker.remain = true
       this.decRest()
+      if(this.rest === 0){ 
+        this.workers = this.workers.filter(e => e.remain)
+        this.fillWorker() 
+        this.workers.forEach(e=>{
+          e.remain = false
+        })
+      }
     },
 
     makeFacility: function(facility){
@@ -316,7 +331,23 @@ const app = {
       if(facility.name === "燻製小屋"){
         this.res_find("肉").rot = ""
         this.res_find("魚").rot = "" 
+      } else if(facility.name === "馬小屋"){
+        this.res_find("馬").num += 1
+        this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
+        if(this.fields.find(f => f.kind === "馬")){
+          this.fields.find(f => f.kind === "馬").kind = "空き"
+        }
       }
+    },
+
+    sight_die(n){
+      this.memoVP("観光化",n)
+      let vps = this.vps.find(e=>e.name==="観光化")
+      if(vps.num >= 20){ vps.num = 20 }
+      if(this.cost-n > 0){this.dice.push({num:this.cost-n})}
+      this.status = ""
+      this.cost = ""
+      this.sight_numbers = []
     },
 
     deleteDie: function(){
@@ -336,7 +367,7 @@ const app = {
 
       if(this.turn === 8){
         this.endGame = true
-        this.memoVP("宝石",this.res_find("宝石").num*5)
+        this.memoVP("宝石",this.res_find("宝石").num*7)
         this.countWorkerVP()
         this.memoVP("物乞い",(this.res_find("物乞い").num*3)*(-1))
 
@@ -351,7 +382,6 @@ const app = {
       this.turn += 1
       this.field_die = ""
       this.usedCommands = []
-      this.workers.splice(0, 2)
       
       if(this.turn === 3){
         this.items_template[0].push({name:"牛",num:1})
@@ -374,25 +404,27 @@ const app = {
         else{n = Math.floor(Math.random()*6)+1}
         this.dice.push({num:n})
       }
-      let wc = this.workers.length
-      for(let i=0;i<6-wc;i++){
-        if(this.workers_deck.length > 0){
-          this.workers.push(this.workers_deck.shift())
-        }
+      
+      if(this.skip_trash_worker){
+        this.skip_trash_worker = false
+      } else {
+        this.workers.splice(0, 2)
       }
+      this.fillWorker()
+
       this.rotResource()
       this.growPlantsAndAnimals()
       if(this.worker_find("世話人")){this.res_find("食料").num+=2}
       this.makeBuffer()
-
     },
 
     endCommand(name){
       this.status = ""
       if(this.rest === 0){return true}
-      if(name === "種を蒔く" || name === "パン焼き釜" || name === "バター工房" || name === "解体小屋"){
+      if(name === "パン焼き釜" || name === "解体小屋"){
         this.dice.push({num:this.rest})
       }
+      this.rest = 0
     },
 
     rotResource: function(){
@@ -436,8 +468,17 @@ const app = {
           this.res_find("花").num += 2 + compost
           if(w){this.res_find("花の種").num += 1}
         }
-        if(!this.isAnimal(e.kind)){e.kind = "空き"}
+        if(!(this.isAnimal(e.kind) || e.kind === "馬")){e.kind = "空き"}
       })
+    },
+
+    fillWorker(){
+      let wc = this.workers.length
+      for(let i=0;i<6-wc;i++){
+        if(this.workers_deck.length > 0){
+          this.workers.push(this.workers_deck.shift())
+        }
+      }
     },
 
     showButton: function(command,str){
@@ -448,38 +489,20 @@ const app = {
           return true;
         } else if(this.status === "bread" && command.name === "パン焼き釜"){
           return true;
-        } else if(this.status === "butter" && command.name === "バター工房"){
-          return true;
         } else if(this.status === "butchering" && command.name === "解体小屋"){
           return true;
         }
-      }else if(str === "出荷"){
-        if(this.status === "market" && this.worker_find(command.name).change){
+      } else if(str === "出荷"){
+        if(this.status_market && this.worker_find(command.name).change){
           return true;
         }
       }
     },
 
-    showRest: function(command) {
-      if(this.status === "seeding" && command.name === "種を蒔く"){
-        return true;
-      } else if(this.status === "trash_worker" && command.name === "募集"){
-        return true;
-      } else if(this.status === "market" && command.name === "出荷"){
-        return true;
-      } else if(this.status === "bread" && command.name === "パン焼き釜"){
-        return true
-      } else if(this.status === "butter" && command.name === "バター工房"){
-        return true;
+    showFieldDie(name){
+      if(name === "畑を耕す" && this.field_die){
+        return "["+this.field_die+"]"
       }
-    },
-
-    showSight(command){
-      return command.name === "観光化"
-    },
-
-    showDice(){
-      return this.sightDice.join()
     },
 
     workerButtons: function(name){
@@ -492,18 +515,36 @@ const app = {
       } else if(name === "精肉屋"){
         return ["鶏>肉2","羊>肉4","豚>肉6","牛>肉8"]
       } else if(name === "パン職人"){
-        return ["麦1>食料2","麦2>VP3"]
+        return ["麦1>食料2","麦2>VP2"]
       } else if(name === "ソーセージ職人"){
         return [">食料2",">VP3"]
+      } else if(name === "馬"){
+        if(this.status === "horse_market"){ return ["終わる"] }
+        else { return ["出荷"] }
       }
     },
 
     showWorkerButtons(worker,button){
-      if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
+      if(worker.name === "馬"){
+        if(this.status === "" && !this.usedCommand(worker.name)){
+          return true; // 「出荷」を表示
+        } else if(this.status === "horse_market"){
+          return true; // 「終わる」を表示
+        }
+      } else if(worker.dice && this.holdingDie && !this.usedCommand(worker.name)){
         return true;
-      } else if(this.status === "market" && !worker.dice){
+      } else if(this.status_market && !worker.dice){
         return true;
       }
+    },
+
+    showUncontractedWorkerButton(worker){
+      if(this.status === 'contract'){
+        return true
+      } else if(this.status === 'trash_worker' && !worker.remain){
+        return true
+      }
+      return false
     },
 
     food_changeable: function(res){
@@ -639,13 +680,11 @@ const app = {
 
     show_if_res_command: function(res){
       let n = res.name
-      if(this.status === "market" && this.sellable(res)){
+      if(this.status_market && this.sellable(res)){
         return true;
       } else if(this.status === "seeding" && this.isSeed(res)){
         return true
       } else if(this.status === "bread" && n === "麦"){
-        return true
-      } else if(this.status === "butter" && n === "牛乳"){
         return true
       } else if(this.status === "butchering" && this.isAnimal(res)){
         return true
@@ -684,17 +723,13 @@ const app = {
     },
 
     clickResCommand: function(res){
-      if(this.status === "market"){
+      if(this.status_market){
         this.change_to_vp(res)
       } else if(this.status === "seeding"){
         this.doSeed(res)
       } else if(this.status === "bread"){
         res.num -= 1
         this.res_find("食料").num += 2
-        this.decRest()
-      } else if(this.status === "butter"){
-        res.num -= 1
-        this.res_find("バター").num += 1
         this.decRest()
       } else if(this.status === "butchering"){
         res.num -= 1
@@ -744,10 +779,10 @@ const app = {
         if(button === "麦1>食料2"){
           r.num -= 1
           this.res_find("食料").num += 2
-        } else if(button === "麦2>VP3"){
+        } else if(button === "麦2>VP2"){
           if(r.num <= 1){return false}
           r.num -= 2
-          this.memoVP("パン職人",3)
+          this.memoVP("パン職人",2)
         }
         this.decRest()
       } else if(n === "ソーセージ職人"){
@@ -777,6 +812,14 @@ const app = {
         this.decRest()
         this.res_find("肉").num += this.meatAmount(r)
         this.checkFieldsFilled()
+      } else if(n === "馬"){
+        if(button === "出荷"){
+          this.rest = 2
+          this.status = "horse_market"
+          this.usedCommands.push("馬")
+        } else if(button === "終わる"){
+          this.endCommand("馬")
+        }
       }
     },
 
@@ -801,7 +844,7 @@ const app = {
     },
 
     food_change_str: function(res){
-      if(this.status === "" || this.status === "bread" || this.status === "butter"){
+      if(this.status === ""){
         return ">食料1"
       } else if(this.status === "cooking") {
         return "料理"
@@ -810,7 +853,7 @@ const app = {
 
     res_command_str: function(res){
       let n = res.name
-      if(this.status === "market"){
+      if(this.status_market){
         if(n === "麦"){
           return "2>1VP"
         }
@@ -819,8 +862,6 @@ const app = {
         return "蒔く"
       } else if(this.status === "bread" && n === "麦"){
         return ">2食料"
-      } else if(this.status === "butter" && n === "牛乳"){
-        return ">バター"
       } else if(this.status === "butchering" && this.isAnimal(res)){
         return ">肉"+this.meatAmount(res)
       } 
@@ -849,7 +890,7 @@ const app = {
     },
 
     existEmptyFieldForAnimal: function(name){
-      if(!(name === "鶏" || name === "羊" || name === "豚" || name === "牛")){return false}
+      if(name != "鶏" && name != "羊" && name != "豚" && name != "牛" && name != "馬"){return false}
       if(this.fields.find(e => e.kind === name)){return true}
       else if(this.empty_field){return true}
       return false
@@ -868,21 +909,21 @@ const app = {
       if(this.worker_find("畜産学者")){
         let c = 0
         while(this.res_find("鶏").num > c && this.res_find("羊").num > c && this.res_find("豚").num > c && this.res_find("牛").num > c){
-          this.memoVP("畜産学者",15)
+          this.memoVP("畜産学者",20)
           c += 1
         }
       }
       if(this.worker_find("測量士") && this.fields.length >= 8){
-        this.memoVP("測量士",30)
+        this.memoVP("測量士",25)
       }
       if(this.worker_find("牧師")){
         if(this.res_find("物乞い").num > 5){this.res_find("物乞い").num -= 5}
         else{this.res_find("物乞い").num = 0}
       }
       if(this.worker_find("会計士")){
-        this.memoVP("会計士",Math.floor(this.res_find("VP").num/10))
+        this.memoVP("会計士",Math.floor(this.res_find("VP").num/12))
       }
-      if(this.worker_find("ツアーガイド") && this.sightDice.length === 6){
+      if(this.worker_find("ツアーガイド") && this.vps.find(e=>e.name==="観光化").num === 20){
         this.memoVP("観光化",10)
       }
     },
@@ -931,6 +972,18 @@ const app = {
     showRules: function(){
       let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/rule.md';
       let Name = 'dicey_farm_rule';
+      window.open(URL,Name);
+    },
+
+    showBeta: function(){
+      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/beta.md';
+      let Name = 'dicey_farm_beta_doc';
+      window.open(URL,Name);
+    },
+
+    showUpdates: function(){
+      let URL = 'https://github.com/vivit-jc/dicey_farm/blob/main/updates.md';
+      let Name = 'dicey_farm_updates_doc';
       window.open(URL,Name);
     },
 
@@ -1056,6 +1109,7 @@ const app = {
         {name:"羊",num:0},
         {name:"豚",num:0},
         {name:"牛",num:0},
+        {name:"馬",num:0},
         {name:"肉",num:0,rot:"▲"},
         {name:"卵",num:0,rot:"▲"},
         {name:"牛乳",num:0,rot:"▲"},
@@ -1068,7 +1122,7 @@ const app = {
         //変換方法が複数ある職人はchange:trueを付けないことに注意
         {name:"釣り人",des:"釣りで得る魚+3",passive:true},
         {name:"荷運び",des:"出荷の回数+3",passive:true},
-        {name:"斡旋業者",des:"契約時の食料コストが常に1になる",passive:true},
+        {name:"斡旋業者",des:"契約コストが1になる 毎ラウンド何度でも契約を行える",passive:true},
         {name:"大工",des:"どのダイスでも増築できる",passive:true},
         {name:"行商人",des:"買い物スロットを追加",vendor:true},
         {name:"家畜商人",des:"買い物スロットを追加",vendor:true},
@@ -1078,8 +1132,8 @@ const app = {
         {name:"牛飼い",des:"牛がいれば1回で2つの畑を耕せる",passive:true},
         {name:"羊飼い",des:"毎ラウンド終了時、羊2匹につき追加の羊毛1を得る",passive:true},
         {name:"世話人",des:"毎ラウンド開始時、食料2を得る",passive:true},
-        {name:"種まき人",des:"種を蒔くアクションが1ラウンドに何回でもできる",passive:true},
-        {name:"パン職人",des:"麦1つを2食料に変えるか、麦2つを3VPに変える",market:true},
+        {name:"種まき人",des:"種を蒔くアクションの後、1のダイスを得る",passive:true},
+        {name:"パン職人",des:"麦1つを2食料に変えるか、麦2つを2VPに変える",market:true},
         {name:"菓子職人",des:"麦、卵、牛乳を9VPに変える",change:true,market:true},
         {name:"ウィスキー職人",des:"麦2つをウィスキーに変える",change:true,market:true},
         {name:"チーズ職人",des:"牛乳を5VPに変える",change:true,market:true},
@@ -1092,10 +1146,10 @@ const app = {
         {name:"長老",des:"ダイス1つの目を+1か-1する",dice:true},
         {name:"役人",des:"ダイス1つの目をひっくり返す",dice:true},
         {name:"夜警",des:"ダイス1つの目を2か5にする",dice:true},
-        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛のセットが1つにつき15VP",passive:true},
-        {name:"測量士",des:"ゲーム終了時、畑が8以上あれば30VP",passive:true},
-        {name:"会計士",des:"ゲーム終了時、10VPにつき1VP得る",passive:true},
-        {name:"ツアーガイド",des:"ゲーム終了時、観光化が完了しているなら10VP",passive:true},
+        {name:"畜産学者",des:"ゲーム終了時、鶏、羊、豚、牛のセットが1つにつき20VP",passive:true},
+        {name:"測量士",des:"ゲーム終了時、畑が8以上あれば25VP",passive:true},
+        {name:"会計士",des:"ゲーム終了時、12VPにつき1VP得る",passive:true},
+        {name:"ツアーガイド",des:"ゲーム終了時、観光化で20VPを得ていれば10VP",passive:true},
         {name:"牧師",des:"ゲーム終了時、物乞いを5回まで無視する",passive:true},
       ]
       this.items_template[0] = [
@@ -1109,11 +1163,11 @@ const app = {
       this.items = this.items_template[0]
 
       this.facilities = [
-        {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",cost:0,action:true},
-        {name:"バター工房",des:"牛乳をバターに変える 残りを返却",cost:0,action:true},
-        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8 (N-1)を返却",cost:0,action:true},
-        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",cost:0,passive:true},
-        {name:"燻製小屋",des:"肉、魚が腐らなくなる",cost:0,passive:true},
+        {name:"パン焼き釜",des:"麦を2食料に変える 残りを返却",action:true},
+        {name:"解体小屋",des:"家畜1頭を肉に変える 鶏:2 羊:4 豚:6 牛:8 (N-1)を返却",action:true},
+        {name:"堆肥小屋",des:"家畜が1~3頭なら、麦、野菜、花の収穫量+1、4頭以上なら+2",passive:true},
+        {name:"燻製小屋",des:"肉、魚が腐らなくなる",passive:true},
+        {name:"馬小屋",des:"馬を1つ得る 馬は畑を専有しない",passive:true},
       ]
       this.vps = [
         {name:"市場",num:0},
@@ -1148,9 +1202,7 @@ const app = {
         this.initDailyData()
       }
 
-      for(let i=0;i<6;i++){
-        this.workers.push(this.workers_deck.shift())
-      }
+      this.fillWorker()
 
       this.makeBuffer()
     },

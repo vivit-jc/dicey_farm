@@ -30,6 +30,8 @@
           <button type="button" @click="toggleOmit" class="btn btn-secondary btn-sm">{{omit_str}}</button>
           <button type="button" @click="showHowToPlay" class="btn btn-secondary btn-sm">遊び方</button>
           <button type="button" @click="showRules" class="btn btn-secondary btn-sm">ルール説明</button>
+          <button type="button" @click="showBeta" v-show="beta" class="btn btn-secondary btn-sm">β変更点</button>
+          <button type="button" @click="showUpdates" v-show="!beta" class="btn btn-secondary btn-sm">変更履歴</button>
           <ul class="list-group" v-show="endGame">
             <li class="list-group-item vp_list" v-for="vp in vps" v-show='showVP(vp)'>
               {{vp.name}}:{{vp.num}}
@@ -73,19 +75,19 @@
               <li class="list-group-item small" v-for="(rank, index) in ranks" v-bind:class="{recent:recentResult(index)}">{{rank_str(index)}}:{{rank}}</li>
             </ul>
           </div>
-          <div class="row space" id="action_space">
+          <div class="row space position-relative" id="action_space">
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-secondary" v-show="rest>0">残り{{rest}}</span>
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in commands" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
-                {{command.name}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
-                <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
-                <p class="des" v-show="showSight(command)">[{{showDice()}}]</p>
+                {{command.name}}{{showFieldDie(command.name)}}<br><span class="des" v-show="!(small && omit)">{{command.des}}</span>
+                <p class="des" v-show="command.name==='観光化'">[{{vps.find(e=>e.name==="観光化").num}}]</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
+                <button type="button" class="rounded-pill btn-sm" v-for="num in sight_numbers" @click="sight_die(num)" v-show="status==='touristy' && command.name==='観光化'">{{cost-num}}</button>
               </li>
             </ul>
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item action" v-for="command in contracted" v-bind:class="[{hover:activeItem===command},{selected:usedCommand(command.name)},{passive:command.passive},command_style(command)]" @mouseover="activeItem=command" @mouseout="activeItem=''" v-on:click="click_command(command)">
                 {{command.name}}<br><span class="des">{{command.des}}</span>
-                <p class="des" v-show="showRest(command)">残り:{{rest}}</p>
                 <button type="button" @click="endCommand(command.name)" v-show='showButton(command,"終わる")' class="rounded-pill btn-sm">終わる</button>
                 <button type="button" @click="change_by_worker(command.name)" v-show='showButton(command,"出荷")' class="rounded-pill btn-sm">出荷</button>
                 <button type="button" @click="clickWorkerCommand(command,button)" v-show='showWorkerButtons(command,button)' v-for="button in workerButtons(command.name)" :key="command" class="rounded-pill btn-sm">{{button}}</button>
@@ -125,8 +127,7 @@
             <ul class="list-group list-group-horizontal" >
               <li class="list-group-item worker" v-for="worker in workers" v-bind:class="[{market:worker.market},command_style(worker)]">
                 {{worker.name}}<br><span class="des">{{worker.des}}</span><br>
-                <button type="button" @click="contractWorker(worker)" v-show="status==='contract'" class="rounded-pill btn-sm">契約</button>
-                <button type="button" @click="trashWorker(worker)" v-show="status==='trash_worker'" class="rounded-pill btn-sm">捨てる</button>
+                <button type="button" @click="clickUncontractWorker(worker)" v-show="showUncontractedWorkerButton(worker)" class="rounded-pill btn-sm">{{uncontracted_worker_str}}</button>
               </li>
             </ul>
           </div>
