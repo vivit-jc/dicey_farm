@@ -4,7 +4,7 @@ const app = {
   data() {
     return {
       mode: "normal",
-      beta: true,
+      beta: false,
       viewStatus: "game",
       showAlert:false,
       small: false,
