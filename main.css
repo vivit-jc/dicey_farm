@@ -182,3 +182,7 @@ h1: {
   font-size: 18px !important;
   z-index: 1;
 }
+
+.badge-wide {
+  width: 300px !important;
+}

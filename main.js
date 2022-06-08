@@ -11,6 +11,7 @@ const app = {
       omit: true,
       alert_str:"",
       tweet_str:"",
+      badge_str:"",
       turn:1,
       ranks:[],
       status:"",
@@ -262,6 +263,7 @@ const app = {
         }
         this.status = "touristy"
         this.cost = this.holdingDie.num
+        this.badge_str = "返却するダイスを選んでください"
 
       } else if(n === "日雇い労働"){
         this.res_find("食料").num += 3
@@ -310,6 +312,8 @@ const app = {
         this.vendors_list[id] = this.items_template[id].slice()
         this.merchants_str.push(worker.name)
         this.shuffleVendorFromTable(id)
+      } else if(worker.name === "斡旋業者"){
+        this.usedCommands = this.usedCommands.filter(e => e != "契約") 
       }
     },
 
@@ -351,6 +355,7 @@ const app = {
       this.status = ""
       this.cost = ""
       this.sight_numbers = []
+      this.badge_str = ""
     },
 
     deleteDie: function(){
