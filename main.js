@@ -201,10 +201,11 @@ const app = {
           } else if(!this.existEmptyFieldForAnimal(item.name)){
             this.addAlert("新しい家畜を買うための空いた畑がありません")
             return false;
+          } else if(!this.fields.find(e => e.kind === item.name)){
+            this.empty_field.kind = item.name
           }
-          if(!this.fields.find(e => e.kind === item.name)){this.empty_field.kind = item.name}
         }
-        if(item.name === "馬"){
+        if(item.name === "馬" && !this.worker_find("馬")){
           this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
         }
         this.res_find(item.name).num += item.num
@@ -333,7 +334,9 @@ const app = {
         this.res_find("魚").rot = "" 
       } else if(facility.name === "馬小屋"){
         this.res_find("馬").num += 1
-        this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
+        if(!this.worker_find("馬")){
+          this.contracted.push({name:"馬",des:"ダイスを使わない 2回出荷する",market:true})
+        }
         if(this.fields.find(f => f.kind === "馬")){
           this.fields.find(f => f.kind === "馬").kind = "空き"
         }
