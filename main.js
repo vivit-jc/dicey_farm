@@ -1055,7 +1055,6 @@ const app = {
       this.buffer.facilities = this.facilities.slice()
       this.buffer.vps = JSON.parse(JSON.stringify(this.vps));
       this.buffer.fields = JSON.parse(JSON.stringify(this.fields));
-      this.buffer.sightDice = this.sightDice.slice()
       this.buffer.dice = this.dice.slice()
     },
 
@@ -1069,7 +1068,6 @@ const app = {
       this.facilities = this.buffer.facilities.slice()
       this.vps = JSON.parse(JSON.stringify(this.buffer.vps));
       this.fields = JSON.parse(JSON.stringify(this.buffer.fields));
-      this.sightDice = this.buffer.sightDice.slice()
       this.dice = this.buffer.dice.slice()
 
       this.field_die = ""
@@ -1093,10 +1091,11 @@ const app = {
       this.fields = [{kind:"空き"}]
       this.field_die = ""
       this.rest = 0
+      this.cost = 0
       this.status = ""
       this.resCooking = ""
       this.holdingDie = ""
-      this.sightDice = []
+      this.sight_numbers = []
       this.usedCommands = []
       this.items2 = []
       this.items_animal = []
